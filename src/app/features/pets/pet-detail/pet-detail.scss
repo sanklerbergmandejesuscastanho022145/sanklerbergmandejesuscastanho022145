@@ -1,0 +1,236 @@
+// Paleta de cores da bandeira de Mato Grosso
+$mt-azul: #003DA5;        // Azul
+$mt-branco: #FFFFFF;      // Branco
+$mt-verde: #009B3A;       // Verde
+$mt-amarelo: #FFD100;     // Amarelo
+$mt-azul-claro: #4A90E2;  // Azul claro para variações
+
+.pet-detail-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2rem;
+
+  .pet-detail-card {
+    background: $mt-branco;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0, 61, 165, 0.15);
+    overflow: hidden;
+    border-top: 4px solid $mt-verde;
+
+    .pet-header {
+      display: flex;
+      align-items: center;
+      gap: 2rem;
+      padding: 2rem;
+      background: linear-gradient(135deg, lighten($mt-azul-claro, 35%) 0%, lighten($mt-verde, 45%) 100%);
+      border-bottom: 3px solid $mt-azul;
+
+      @media (max-width: 768px) {
+        flex-direction: column;
+        text-align: center;
+      }
+
+      .pet-photo {
+        width: 200px;
+        height: 200px;
+        object-fit: cover;
+        border-radius: 50%;
+        border: 5px solid $mt-branco;
+        box-shadow: 0 4px 12px rgba(0, 61, 165, 0.3);
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+
+        &:hover {
+          transform: scale(1.05);
+          box-shadow: 0 6px 16px rgba(0, 61, 165, 0.4);
+        }
+
+        @media (max-width: 768px) {
+          width: 150px;
+          height: 150px;
+        }
+      }
+
+      .pet-info-header {
+        flex: 1;
+
+        h1 {
+          font-size: 2.5rem;
+          color: $mt-azul;
+          margin: 0;
+          font-weight: 600;
+
+          @media (max-width: 768px) {
+            font-size: 2rem;
+          }
+        }
+      }
+    }
+
+    .pet-details {
+      padding: 2rem;
+
+      .detail-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 1.25rem;
+        margin-bottom: 1rem;
+        background-color: lighten($mt-azul-claro, 35%);
+        border-radius: 8px;
+        border-left: 4px solid $mt-azul;
+        transition: all 0.3s ease;
+
+        &:hover {
+          background-color: lighten($mt-verde, 45%);
+          border-left-color: $mt-verde;
+          transform: translateX(5px);
+        }
+
+        @media (max-width: 768px) {
+          flex-direction: column;
+          align-items: flex-start;
+          gap: 0.5rem;
+        }
+
+        .detail-label {
+          font-weight: 600;
+          color: $mt-azul;
+          font-size: 1rem;
+          text-transform: uppercase;
+          letter-spacing: 0.5px;
+        }
+
+        .detail-value {
+          font-size: 1.1rem;
+          color: darken($mt-azul, 10%);
+          font-weight: 500;
+        }
+      }
+    }
+
+    .action-buttons {
+      display: flex;
+      gap: 1rem;
+      padding: 2rem;
+      background-color: lighten($mt-azul-claro, 38%);
+      border-top: 2px solid lighten($mt-azul-claro, 25%);
+
+      @media (max-width: 768px) {
+        flex-direction: column;
+      }
+
+      button {
+        flex: 1;
+        padding: 0.875rem 1.5rem;
+        border: none;
+        border-radius: 8px;
+        font-size: 1rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+
+        &:hover {
+          transform: translateY(-2px);
+          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        &.btn-edit {
+          background: linear-gradient(135deg, $mt-amarelo 0%, darken($mt-amarelo, 10%) 100%);
+          color: $mt-azul;
+          border: 2px solid $mt-amarelo;
+
+          &:hover {
+            background: linear-gradient(135deg, darken($mt-amarelo, 5%) 0%, darken($mt-amarelo, 15%) 100%);
+            box-shadow: 0 4px 12px rgba(255, 209, 0, 0.4);
+          }
+        }
+
+        &.btn-delete {
+          background-color: #e74c3c;
+          color: $mt-branco;
+          border: 2px solid #c0392b;
+
+          &:hover {
+            background-color: #c0392b;
+            box-shadow: 0 4px 12px rgba(231, 76, 60, 0.4);
+          }
+        }
+
+        &.btn-back {
+          background-color: $mt-azul-claro;
+          color: $mt-branco;
+          border: 2px solid $mt-azul;
+
+          &:hover {
+            background-color: $mt-azul;
+            box-shadow: 0 4px 12px rgba(0, 61, 165, 0.3);
+          }
+        }
+      }
+    }
+  }
+
+  .loading {
+    text-align: center;
+    padding: 4rem 2rem;
+    font-size: 1.3rem;
+    color: $mt-azul-claro;
+    font-weight: 500;
+    background: lighten($mt-azul-claro, 38%);
+    border-radius: 12px;
+    border: 2px solid $mt-azul-claro;
+    animation: pulse 1.5s ease-in-out infinite;
+
+    p {
+      margin: 0;
+    }
+  }
+
+  @keyframes pulse {
+    0%, 100% { 
+      opacity: 1;
+      transform: scale(1);
+    }
+    50% { 
+      opacity: 0.7;
+      transform: scale(0.98);
+    }
+  }
+
+  .error {
+    background-color: #ffebee;
+    color: #c62828;
+    padding: 2rem;
+    border-radius: 12px;
+    text-align: center;
+    margin: 2rem 0;
+    border-left: 6px solid #f44336;
+    box-shadow: 0 2px 8px rgba(198, 40, 40, 0.2);
+
+    p {
+      margin: 0 0 1rem 0;
+      font-size: 1.1rem;
+      font-weight: 500;
+    }
+
+    button {
+      padding: 0.75rem 1.5rem;
+      background-color: $mt-azul;
+      color: $mt-branco;
+      border: none;
+      border-radius: 8px;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+
+      &:hover {
+        background-color: $mt-azul-claro;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0, 61, 165, 0.3);
+      }
+    }
+  }
+}

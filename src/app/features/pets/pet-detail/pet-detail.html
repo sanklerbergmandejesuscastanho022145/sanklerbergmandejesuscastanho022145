@@ -1,0 +1,68 @@
+<div class="pet-detail-container">
+  <div class="pet-detail-card" *ngIf="pet && !isLoading">
+    <div class="pet-header">
+      <img 
+        [src]="imageUrl"
+        [alt]="pet.nome"
+        class="pet-photo"
+      >
+      <div class="pet-info-header">
+        <h1>{{ pet.nome }}</h1>
+      </div>
+    </div>
+
+    
+    <div class="pet-details">
+      <div class="detail-item">
+        <span class="detail-label">ID:</span>
+        <span class="detail-value">{{ pet.id }}</span>
+      </div>
+
+      <div class="detail-item">
+        <span class="detail-label">Raça:</span>
+        <span class="detail-value">{{ pet.raca }}</span>
+      </div>
+
+      <div class="detail-item">
+        <span class="detail-label">Idade:</span>
+        <span class="detail-value">{{ pet.idade }} anos</span>
+      </div>
+
+      <div class="detail-item" *ngIf="pet.tutores?.length">
+      <span class="detail-label">Tutores:</span>
+      <span class="detail-value">
+        <span *ngFor="let tutor of pet.tutores ?? []; let last = last">
+          {{ tutor.nome }}<span *ngIf="!last">, </span>
+        </span>
+      </span>
+      </div>
+
+
+      <div class="detail-item" *ngIf="!pet.tutores || pet.tutores.length === 0">
+        <span class="detail-label">Tutores:</span>
+        <span class="detail-value">Nenhum tutor cadastrado</span>
+      </div>
+    </div>
+
+    <div class="action-buttons">
+      <button class="btn-edit" (click)="editarPet()">
+        Editar
+      </button>
+      <button class="btn-delete" (click)="excluirPet()">
+        Excluir
+      </button>
+      <button class="btn-back" (click)="voltarParaLista()">
+        Voltar
+      </button>
+    </div>
+  </div>
+
+  <div class="loading" *ngIf="isLoading">
+    <p>Carregando detalhes do pet...</p>
+  </div>
+
+  <div class="error" *ngIf="errorMessage">
+    <p>{{ errorMessage }}</p>
+    <button (click)="voltarParaLista()">Voltar para lista</button>
+  </div>
+</div>

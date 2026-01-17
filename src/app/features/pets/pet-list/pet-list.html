@@ -1,0 +1,50 @@
+<div class="pets-container">
+  <div class="pets-header">
+    <h1>Lista de Pets</h1>
+    <div class="header-actions">
+      <button class="btn-primary" (click)="novoPet()">Novo Pet</button>
+      <button class="btn-logout" (click)="logout()">Sair</button>
+    </div>
+  </div>
+
+  <!-- Mostrar loading -->
+  <div *ngIf="loading" class="loading">
+    Carregando...
+  </div>
+
+  <!-- Mostrar erro -->
+  <div *ngIf="!loading && errorMessage" class="error-message">
+    {{ errorMessage }}
+  </div>
+
+  
+  <div class="pets-grid" *ngIf="!loading && !errorMessage && pets.length > 0">
+    <div class="pet-card" *ngFor="let pet of pets">
+      <div class="pet-image" *ngIf="pet.foto?.url">
+        <img [src]="pet.foto?.url || ''" [alt]="pet.nome">
+      </div>
+      
+      <div class="pet-image empty-photo" *ngIf="!pet.foto?.url">
+        <span>📷</span>
+      </div>
+      
+      <div class="pet-info">
+        <h3>{{ pet.nome }}</h3>
+        <p *ngIf="pet.raca"><strong>Raça:</strong> {{ pet.raca }}</p>
+        <p *ngIf="pet.idade"><strong>Idade:</strong> {{ pet.idade }} anos</p>
+      </div>
+
+      <div class="pet-actions">
+        <button class="btn-view" (click)="verDetalhes(pet.id!)">Ver Detalhes</button>
+        <button class="btn-edit" (click)="editarPet(pet.id!)">Editar</button>
+        <button class="btn-delete" (click)="deletarPet(pet.id!)">Excluir</button>
+      </div>
+    </div>
+  </div>
+
+  
+  <div *ngIf="!loading && !errorMessage && pets.length === 0" class="empty-state">
+    <p>Nenhum pet cadastrado ainda.</p>
+    <button class="btn-primary" (click)="novoPet()">Cadastrar primeiro pet</button>
+  </div>
+</div>

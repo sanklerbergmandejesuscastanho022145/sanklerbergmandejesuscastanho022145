@@ -1,0 +1,141 @@
+<div class="container">
+  <div class="form-card">
+    <h2>Cadastrar Novo Pet</h2>
+
+    <form [formGroup]="petForm" (ngSubmit)="onSubmit()">
+      
+      <div class="form-group">
+        <label for="nome">Nome *</label>
+        <input 
+          type="text" 
+          id="nome" 
+          formControlName="nome"
+          placeholder="Digite o nome do pet"
+          [class.error]="petForm.get('nome')?.invalid && petForm.get('nome')?.touched">
+        <small class="error-message" *ngIf="petForm.get('nome')?.hasError('required') && petForm.get('nome')?.touched">
+          Nome é obrigatório
+        </small>
+        <small class="error-message" *ngIf="petForm.get('nome')?.hasError('minlength') && petForm.get('nome')?.touched">
+          Nome deve ter no mínimo 2 caracteres
+        </small>
+      </div>
+
+      <div class="form-group">
+        <label for="especie">Espécie *</label>
+        <select id="especie" formControlName="especie"
+                [class.error]="petForm.get('especie')?.invalid && petForm.get('especie')?.touched">
+          <option value="">Selecione...</option>
+          <option value="CACHORRO">Cachorro</option>
+          <option value="GATO">Gato</option>
+          <option value="PASSARO">Pássaro</option>
+          <option value="COELHO">Coelho</option>
+          <option value="HAMSTER">Hamster</option>
+          <option value="OUTROS">Outros</option>
+        </select>
+        <small class="error-message" *ngIf="petForm.get('especie')?.hasError('required') && petForm.get('especie')?.touched">
+          Espécie é obrigatória
+        </small>
+      </div>
+
+      <div class="form-group">
+        <label for="raca">Raça</label>
+        <input 
+          type="text" 
+          id="raca" 
+          formControlName="raca"
+          placeholder="Ex: Labrador, Persa...">
+      </div>
+
+      <div class="form-group">
+        <label for="idade">Idade (anos) *</label>
+        <input 
+          type="number" 
+          id="idade" 
+          formControlName="idade"
+          placeholder="Digite a idade do pet"
+          min="0"
+          max="50"
+          [class.error]="petForm.get('idade')?.invalid && petForm.get('idade')?.touched">
+        <small class="error-message" *ngIf="petForm.get('idade')?.hasError('required') && petForm.get('idade')?.touched">
+          Idade é obrigatória
+        </small>
+        <small class="error-message" *ngIf="petForm.get('idade')?.hasError('min') && petForm.get('idade')?.touched">
+          Idade deve ser maior ou igual a 0
+        </small>
+        <small class="error-message" *ngIf="petForm.get('idade')?.hasError('max') && petForm.get('idade')?.touched">
+          Idade deve ser no máximo 50 anos
+        </small>
+      </div>
+
+      <div class="form-group">
+  <label for="foto">Foto do Pet</label>
+  <div class="photo-upload-area">
+    <input 
+      type="file" 
+      id="foto" 
+      accept="image/*"
+      (change)="onFileSelected($event)"
+      #fileInput
+      hidden>
+    
+    <!-- barra de progresso para ver tempo -->
+    <div class="photo-preview-container" *ngIf="fotoPreview || uploadProgress > 0">
+      
+      
+      <div class="loading-overlay" *ngIf="uploadProgress > 0 && uploadProgress < 100">
+        <div class="progress-bar">
+          <div class="progress-fill" [style.width.%]="uploadProgress"></div>
+        </div>
+        <span class="progress-text">{{ uploadProgress }}%</span>
+      </div>
+      
+      
+      <div class="photo-preview" *ngIf="fotoPreview">
+        <img [src]="fotoPreview" alt="Preview da foto">
+        <button type="button" class="btn-remove-photo" (click)="removePhoto()">
+          ✕
+        </button>
+      </div>
+    </div>
+    
+   
+    <button 
+      type="button" 
+      class="btn-upload" 
+      *ngIf="!fotoPreview && uploadProgress === 0"
+      (click)="fileInput.click()">
+      📷 Escolher Foto
+    </button>
+  </div>
+  <small class="info-message">Formatos aceitos: JPG, PNG, GIF (máx. 5MB)</small>
+</div>
+
+      <div class="form-group">
+        <label for="tutorId">ID do Tutor *</label>
+        <input 
+          type="text" 
+          id="tutorId" 
+          formControlName="tutorId"
+          placeholder="Digite o ID do tutor"
+          [class.error]="petForm.get('tutorId')?.invalid && petForm.get('tutorId')?.touched">
+        <small class="error-message" *ngIf="petForm.get('tutorId')?.hasError('required') && petForm.get('tutorId')?.touched">
+          Tutor é obrigatório
+        </small>
+      </div>
+
+      <div class="error-alert" *ngIf="errorMessage">
+        {{ errorMessage }}
+      </div>
+
+      <div class="button-group">
+        <button type="button" class="btn-cancel" (click)="onCancel()" [disabled]="isLoading">
+          Cancelar
+        </button>
+        <button type="submit" class="btn-submit" [disabled]="isLoading || petForm.invalid">
+          {{ isLoading ? 'Salvando...' : 'Salvar Pet' }}
+        </button>
+      </div>
+
+    </form>
+  </div>
+</div>

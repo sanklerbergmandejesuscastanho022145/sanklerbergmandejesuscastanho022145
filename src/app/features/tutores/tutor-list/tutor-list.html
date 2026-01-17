@@ -1,0 +1,40 @@
+<div class="tutores-container">
+  <div class="header">
+    <h1>Tutores</h1>
+    <button class="btn-primary" (click)="goToNewTutor()">
+      <span>+</span> Novo Tutor
+    </button>
+  </div>
+
+  <div *ngIf="loading" class="loading">
+    Carregando tutores...
+  </div>
+
+  <div *ngIf="error" class="error-message">
+    {{ error }}
+  </div>
+
+  <div class="tutores-grid" *ngIf="!loading && tutores.length > 0">
+    <div class="tutor-card" *ngFor="let tutor of tutores">
+      <div class="tutor-info">
+        <h3>{{ tutor.nome }}</h3>
+        <p><strong>CPF:</strong> {{ tutor.cpf }}</p>
+        <p><strong>Email:</strong> {{ tutor.email }}</p>
+        <p><strong>Telefone:</strong> {{ tutor.telefone }}</p>
+        <p *ngIf="tutor.pets && tutor.pets.length > 0">
+          <strong>Pets:</strong> {{ tutor.pets.length }}
+        </p>
+      </div>
+      <div class="tutor-actions">
+        <button class="btn-view" (click)="viewDetails(tutor.id)">Ver</button>
+        <button class="btn-edit" (click)="editTutor(tutor.id)">Editar</button>
+        <button class="btn-delete" (click)="deleteTutor(tutor)">Excluir</button>
+      </div>
+    </div>
+  </div>
+
+  <div *ngIf="!loading && tutores.length === 0" class="empty-state">
+    <p>Nenhum tutor cadastrado ainda.</p>
+    <button class="btn-primary" (click)="goToNewTutor()">Cadastrar Primeiro Tutor</button>
+  </div>
+</div>

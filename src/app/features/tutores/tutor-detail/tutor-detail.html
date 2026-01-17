@@ -1,0 +1,74 @@
+<div class="detail-container">
+  <div *ngIf="loading" class="loading">
+    Carregando...
+  </div>
+
+  <div *ngIf="error" class="error-message">
+    {{ error }}
+  </div>
+
+  <div *ngIf="tutor && !loading" class="tutor-detail">
+    <div class="detail-header">
+      <h1>{{ tutor.nome }}</h1>
+      <div class="header-actions">
+        <button class="btn-edit" (click)="editTutor()">Editar</button>
+        <button class="btn-delete" (click)="deleteTutor()">Excluir</button>
+      </div>
+    </div>
+
+    <div class="detail-section">
+      <h3>Informações Pessoais</h3>
+      <div class="info-grid">
+        <div class="info-item">
+          <span class="label">CPF:</span>
+          <span class="value">{{ tutor.cpf }}</span>
+        </div>
+        <div class="info-item">
+          <span class="label">Email:</span>
+          <span class="value">{{ tutor.email }}</span>
+        </div>
+        <div class="info-item">
+          <span class="label">Telefone:</span>
+          <span class="value">{{ tutor.telefone }}</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="detail-section" *ngIf="tutor.endereco || tutor.cidade || tutor. tutor.cep">
+      <h3>Endereço</h3>
+      <div class="info-grid">
+        <div class="info-item" *ngIf="tutor.endereco">
+          <span class="label">Endereço:</span>
+          <span class="value">{{ tutor.endereco }}</span>
+        </div>
+        <div class="info-item" *ngIf="tutor.cidade">
+          <span class="label">Cidade:</span>
+          <span class="value">{{ tutor.cidade }}</span>
+        </div>
+        <div class="info-item" *ngIf="tutor.estado">
+          <span class="label">Estado:</span>
+          <span class="value">{{ tutor.estado }}</span>
+        </div>
+        <div class="info-item" *ngIf="tutor.cep">
+          <span class="label">CEP:</span>
+          <span class="value">{{ tutor.cep }}</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="detail-section" *ngIf="tutor.pets && tutor.pets.length > 0">
+      <h3>Pets ({{ tutor.pets.length }})</h3>
+      <div class="pets-grid">
+        <div class="pet-card" *ngFor="let pet of tutor.pets">
+          <h4>{{ pet.nome }}</h4>
+          <p><strong>Espécie:</strong> {{ pet.<p><strong>Raça:</strong> {{ pet.raca }}</p>
+          <p *ngIf="pet.idade"><strong>Idade:</strong> {{ pet.idade }} anos</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="detail-actions">
+      <button class="btn-back" (click)="goBack()">Voltar</button>
+    </div>
+  </div>
+</div>
