@@ -1,19 +1,27 @@
+// Paleta de cores da bandeira de Mato Grosso
+$mt-azul: #003DA5;        // Azul
+$mt-branco: #FFFFFF;      // Branco
+$mt-verde: #009B3A;       // Verde
+$mt-amarelo: #FFD100;     // Amarelo
+$mt-azul-claro: #4A90E2;  // Azul claro para variações
+
 .login-container {
   display: flex;
   justify-content: center;
   align-items: center;
   min-height: 100vh;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, $mt-azul 0%, $mt-verde 100%);
   padding: 20px;
 }
 
 .login-card {
-  background: white;
+  background: $mt-branco;
   border-radius: 12px;
-  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 10px 40px rgba(0, 61, 165, 0.15);
   padding: 40px;
   width: 100%;
   max-width: 420px;
+  border-top: 4px solid $mt-amarelo;
 }
 
 .login-header {
@@ -23,7 +31,7 @@
   h1 {
     font-size: 28px;
     font-weight: 700;
-    color: #333;
+    color: $mt-azul;
     margin-bottom: 8px;
   }
 
@@ -40,7 +48,7 @@
     label {
       display: block;
       font-weight: 600;
-      color: #333;
+      color: $mt-azul;
       margin-bottom: 8px;
       font-size: 14px;
     }
@@ -55,7 +63,8 @@
 
       &:focus {
         outline: none;
-        border-color: #667eea;
+        border-color: $mt-azul-claro;
+        box-shadow: 0 0 0 3px rgba(74, 144, 226, 0.1);
       }
 
       &.error {
@@ -78,8 +87,14 @@
         background: none;
         border: none;
         cursor: pointer;
+        color: $mt-azul;
         font-size: 18px;
         padding: 4px;
+        transition: color 0.3s ease;
+
+        &:hover {
+          color: $mt-verde;
+        }
       }
     }
 
@@ -93,8 +108,8 @@
   .btn-login {
     width: 100%;
     padding: 14px;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    color: white;
+    background: linear-gradient(135deg, $mt-azul 0%, $mt-verde 100%);
+    color: $mt-branco;
     border: none;
     border-radius: 8px;
     font-size: 16px;
@@ -105,7 +120,8 @@
 
     &:hover:not(:disabled) {
       transform: translateY(-2px);
-      box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+      box-shadow: 0 6px 20px rgba(0, 61, 165, 0.4);
+      background: linear-gradient(135deg, $mt-azul-claro 0%, $mt-verde 100%);
     }
 
     &:disabled {
@@ -120,12 +136,13 @@
   margin-top: 24px;
 
   a {
-    color: #667eea;
+    color: $mt-azul;
     text-decoration: none;
     font-size: 14px;
     font-weight: 500;
 
     &:hover {
+      color: $mt-verde;
       text-decoration: underline;
     }
   }

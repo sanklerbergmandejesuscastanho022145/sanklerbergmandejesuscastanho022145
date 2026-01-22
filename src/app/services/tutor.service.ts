@@ -1,15 +1,24 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
-import { Observable } from 'rxjs';
-import { map } from 'rxjs/operators';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { Observable, throwError } from 'rxjs';
+import { map, catchError } from 'rxjs/operators';
+
+export interface Foto {
+  id: number;
+  nome: string;
+  contentType: string;
+  url: string;
+}
 
 export interface Tutor {
   id?: number;
   nome: string;
-  cpf: string;
-  telefone?: string;
+  telefone: string;
+  endereco: string;
+  cpf?: string;
   email?: string;
-  endereco?: string;
+  foto?: Foto | null;
+  pets?: any[];
 }
 
 export interface PaginatedResponse<T> {
@@ -28,39 +37,113 @@ export class TutorService {
 
   constructor(private http: HttpClient) {}
 
-  // Listar todos os tutores
-  getAllTutores(): Observable<Tutor[]> {
-    return this.http.get<PaginatedResponse<Tutor>>(`${this.API_URL}/v1/tutores`)
-      .pipe(
-        map(response => response.content)
-      );
+  private getHeaders(): HttpHeaders {
+    const token = localStorage.getItem('token');
+    return new HttpHeaders({
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${token}`
+    });
   }
 
-  // Buscar tutor por ID
-  getTutorById(id: number): Observable<Tutor> {
-    return this.http.get<Tutor>(`${this.API_URL}/v1/tutores/${id}`);
+  listarTutores(): Observable<Tutor[]> {
+    return this.http.get<PaginatedResponse<Tutor>>(`${this.API_URL}/v1/tutores`, {
+      headers: this.getHeaders()
+    }).pipe(
+      map(response => response.content),
+      catchError(error => {
+        console.error('Erro ao buscar tutores:', error);
+        return throwError(() => error);
+      })
+    );
   }
 
-  // Criar novo tutor
-  createTutor(tutor: Tutor): Observable<Tutor> {
-    return this.http.post<Tutor>(`${this.API_URL}/v1/tutores`, tutor);
+  obterTutorPorId(id: string): Observable<Tutor> {
+    return this.http.get<Tutor>(`${this.API_URL}/v1/tutores/${id}`, {
+      headers: this.getHeaders()
+    }).pipe(
+      catchError(error => {
+        console.error('Erro ao buscar tutor:', error);
+        return throwError(() => error);
+      })
+    );
   }
 
-  // Atualizar tutor existente
-  updateTutor(id: number, tutor: Tutor): Observable<Tutor> {
-    return this.http.put<Tutor>(`${this.API_URL}/v1/tutores/${id}`, tutor);
+  criarTutor(tutor: Tutor): Observable<Tutor> {
+    return this.http.post<Tutor>(`${this.API_URL}/v1/tutores`, tutor, {
+      headers: this.getHeaders()
+    }).pipe(
+      catchError(error => {
+        console.error('Erro ao criar tutor:', error);
+        return throwError(() => error);
+      })
+    );
   }
 
-  // Deletar tutor
-  deleteTutor(id: number): Observable<void> {
-    return this.http.delete<void>(`${this.API_URL}/v1/tutores/${id}`);
+  atualizarTutor(id: number, tutor: Tutor): Observable<Tutor> {
+    return this.http.put<Tutor>(`${this.API_URL}/v1/tutores/${id}`, tutor, {
+      headers: this.getHeaders()
+    }).pipe(
+      catchError(error => {
+        console.error('Erro ao atualizar tutor:', error);
+        return throwError(() => error);
+      })
+    );
   }
 
-  // Listar pets de um tutor específico
-  getPetsByTutorId(tutorId: number): Observable<any[]> {
-    return this.http.get<PaginatedResponse<any>>(`${this.API_URL}/v1/tutores/${tutorId}/pets`)
-      .pipe(
-        map(response => response.content)
-      );
+  uploadFotoTutor(tutorId: string, foto: File): Observable<any> {
+    const formData = new FormData();
+    formData.append('foto', foto);
+    
+    const token = localStorage.getItem('token');
+    const headers = new HttpHeaders({
+      'Authorization': `Bearer ${token}`
+    });
+    
+    return this.http.post(`${this.API_URL}/v1/tutores/${tutorId}/fotos`, formData, {
+      headers: headers,
+      reportProgress: true,
+      observe: 'events'
+    }).pipe(
+      catchError(error => {
+        console.error('Erro ao fazer upload da foto:', error);
+        return throwError(() => error);
+      })
+    );
+  }
+
+  deletarTutor(id: string): Observable<void> {
+    return this.http.delete<void>(`${this.API_URL}/v1/tutores/${id}`, {
+      headers: this.getHeaders()
+    }).pipe(
+      catchError(error => {
+        console.error('Erro ao deletar tutor:', error);
+        return throwError(() => error);
+      })
+    );
+  }
+
+  vincularPet(tutorId: string, petId: string): Observable<void> {
+    return this.http.post<void>(
+      `${this.API_URL}/v1/tutores/${tutorId}/pets/${petId}`, 
+      {},
+      { headers: this.getHeaders() }
+    ).pipe(
+      catchError(error => {
+        console.error('Erro ao vincular pet:', error);
+        return throwError(() => error);
+      })
+    );
+  }
+
+  desvincularPet(tutorId: string, petId: string): Observable<void> {
+    return this.http.delete<void>(
+      `${this.API_URL}/v1/tutores/${tutorId}/pets/${petId}`,
+      { headers: this.getHeaders() }
+    ).pipe(
+      catchError(error => {
+        console.error('Erro ao desvincular pet:', error);
+        return throwError(() => error);
+      })
+    );
   }
 }

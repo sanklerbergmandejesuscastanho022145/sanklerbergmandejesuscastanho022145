@@ -8,7 +8,7 @@ Antes de começar, certifique-se de ter instalado:
 - **npm** (versão 9.x ou superior)
 - **Angular CLI** (versão 19.x)
 
-# Verifique as versões instaladas
+## Verifique as versões instaladas
 node --version
 npm --version
 ng version
@@ -17,22 +17,23 @@ ng version
 git clone ""
 cd pet-maisperto-mt
 
-# Instale as dependências
+## Instale as dependências
 npm install
 
-# Execute o projeto
+## Execute o projeto
 ng serve --open
 
-**PENDENTES DE SEGUIR PROJETO**
-pagina de pets: Busca por nome para filtrar
-PAGINA DE REGISTRO
-PAGINA DE TUTORES
+### PENDENTES DE SEGUIR PROJETO**
+tshoot pagina de detalhes do tutor(foto sem loading completo)
 VALIDAÇÃO DE RESPONSIVIDADE
 TESTES UNITARIOS
+PAGINA DE REGISTRO(não obrigatorio)
 
-# FINALIZADOS(ORDEM DE PRIORIDADE)
+### FINALIZADOS(ORDEM DE PRIORIDADE)
 tela de login,auth guard, interceptors e modulos
 tela inicial de pets e services
 tela de cadastro do pet
 tela de detalhes do pet
 -ainda priorizar a finalização de paginas com relação ao pet
+pagina de pets: Busca por nome para filtrar
+PAGINA DE TUTORES

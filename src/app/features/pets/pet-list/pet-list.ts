@@ -1,5 +1,6 @@
 import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { PetsService, Pet } from '../../../services/pets.service';
 import { AuthService } from '../../../services/auth.service';
@@ -7,14 +8,16 @@ import { AuthService } from '../../../services/auth.service';
 @Component({
   selector: 'app-pets-list',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, FormsModule],
   templateUrl: './pet-list.html',
   styleUrls: ['./pet-list.scss']
 })
 export class PetsListComponent implements OnInit {
   pets: Pet[] = [];
+  petsFiltrados: Pet[] = [];
   loading = true;
   errorMessage = '';
+  termoBusca = '';
 
   constructor(
     private petsService: PetsService,
@@ -24,40 +27,29 @@ export class PetsListComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    
     this.carregarPets();
   }
 
   carregarPets(): void {
-    // console.log('carregarPets() iniciado');
-    // console.log('Token atual:', localStorage.getItem('token'));
-    
-    
     this.loading = true;
     this.errorMessage = '';
     this.pets = [];
+    this.petsFiltrados = [];
     
     this.petsService.listarPets().subscribe({
       next: (data) => {
-        
-        
         this.pets = data || [];
+        this.petsFiltrados = [...this.pets];
         this.loading = false;
         this.errorMessage = '';
-        // console.log('✅ Estado atualizado:');
-        // console.log('   - this.loading:', this.loading);
-        // console.log('   - this.errorMessage:', this.errorMessage);
-        // console.log('   - this.pets.length:', this.pets.length);
-        
-        // Força a detecção de mudanças
+        this.aplicarFiltro();
         this.cdr.detectChanges();
-        
-        // console.log('✅ detectChanges() executado');
       },
       error: (error) => {
         console.error('Erro completo:', error);
         
         this.pets = [];
+        this.petsFiltrados = [];
         this.loading = false;
         
         if (error.status === 401) {
@@ -76,11 +68,27 @@ export class PetsListComponent implements OnInit {
     });
   }
 
-  verDetalhes(id: number): void {
-  if (id) {
-    this.router.navigate(['/pets', id.toString()]);
+  aplicarFiltro(): void {
+    if (!this.termoBusca.trim()) {
+      this.petsFiltrados = [...this.pets];
+    } else {
+      const termo = this.termoBusca.toLowerCase().trim();
+      this.petsFiltrados = this.pets.filter(pet =>
+        pet.nome.toLowerCase().includes(termo)
+      );
+    }
   }
-}
+
+  limparBusca(): void {
+    this.termoBusca = '';
+    this.aplicarFiltro();
+  }
+
+  verDetalhes(id: number): void {
+    if (id) {
+      this.router.navigate(['/pets', id.toString()]);
+    }
+  }
 
   editarPet(id: number): void {
     this.router.navigate(['/pets', id, 'editar']);
@@ -94,7 +102,6 @@ export class PetsListComponent implements OnInit {
     if (confirm('Deseja realmente deletar este pet?')) {
       this.petsService.deletarPet(id.toString()).subscribe({
         next: () => {
-          // console.log('✅ Pet deletado com sucesso');
           this.carregarPets();
         },
         error: (error) => {
@@ -104,6 +111,10 @@ export class PetsListComponent implements OnInit {
       });
     }
   }
+
+  irParaTutores(): void {
+  this.router.navigate(['/tutores']);
+}
 
   logout(): void {
     this.authService.logout();

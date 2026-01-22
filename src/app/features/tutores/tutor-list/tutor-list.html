@@ -1,40 +1,84 @@
 <div class="tutores-container">
-  <div class="header">
-    <h1>Tutores</h1>
-    <button class="btn-primary" (click)="goToNewTutor()">
-      <span>+</span> Novo Tutor
-    </button>
+  <div class="tutores-header">
+    <h1>Lista de Tutores</h1>
+    <div class="header-actions">
+      <button class="btn-back" (click)="voltarParaPets()">← Pets</button>
+      <button class="btn-primary" (click)="novoTutor()">Novo Tutor</button>
+      <button class="btn-logout" (click)="logout()">Sair</button>
+    </div>
   </div>
 
+  <!-- Campo de Busca -->
+  <div class="search-container" *ngIf="!loading && !errorMessage">
+    <div class="search-box">
+      <span class="search-icon">🔍</span>
+      <input 
+        type="text" 
+        class="search-input" 
+        placeholder="Buscar tutor por nome ou telefone..."
+        [(ngModel)]="termoBusca"
+        (input)="aplicarFiltro()"
+      >
+      <button 
+        class="clear-button" 
+        *ngIf="termoBusca"
+        (click)="limparBusca()"
+        title="Limpar busca"
+      >
+        ✕
+      </button>
+    </div>
+    <div class="search-info" *ngIf="termoBusca">
+      <span>{{ tutoresFiltrados.length }} resultado(s) encontrado(s)</span>
+    </div>
+  </div>
+
+  <!-- Mostrar loading -->
   <div *ngIf="loading" class="loading">
-    Carregando tutores...
+    Carregando...
   </div>
 
-  <div *ngIf="error" class="error-message">
-    {{ error }}
+  <!-- Mostrar erro -->
+  <div *ngIf="!loading && errorMessage" class="error-message">
+    {{ errorMessage }}
   </div>
 
-  <div class="tutores-grid" *ngIf="!loading && tutores.length > 0">
-    <div class="tutor-card" *ngFor="let tutor of tutores">
+  <!-- Grid de tutores -->
+  <div class="tutores-grid" *ngIf="!loading && !errorMessage && tutoresFiltrados.length > 0">
+    <div class="tutor-card" *ngFor="let tutor of tutoresFiltrados">
+      <div class="tutor-image" *ngIf="tutor.foto?.url">
+        <img [src]="tutor.foto?.url || ''" [alt]="tutor.nome">
+      </div>
+      
+      <div class="tutor-image empty-photo" *ngIf="!tutor.foto?.url">
+        <span>👤</span>
+      </div>
+      
       <div class="tutor-info">
         <h3>{{ tutor.nome }}</h3>
-        <p><strong>CPF:</strong> {{ tutor.cpf }}</p>
-        <p><strong>Email:</strong> {{ tutor.email }}</p>
-        <p><strong>Telefone:</strong> {{ tutor.telefone }}</p>
-        <p *ngIf="tutor.pets && tutor.pets.length > 0">
-          <strong>Pets:</strong> {{ tutor.pets.length }}
-        </p>
+        <p *ngIf="tutor.telefone"><strong>📞 Telefone:</strong> {{ tutor.telefone }}</p>
+        <p *ngIf="tutor.endereco"><strong>📍 Endereço:</strong> {{ tutor.endereco }}</p>
+        <p *ngIf="tutor.email"><strong>📧 Email:</strong> {{ tutor.email }}</p>
       </div>
+
       <div class="tutor-actions">
-        <button class="btn-view" (click)="viewDetails(tutor.id)">Ver</button>
-        <button class="btn-edit" (click)="editTutor(tutor.id)">Editar</button>
-        <button class="btn-delete" (click)="deleteTutor(tutor)">Excluir</button>
+        <button class="btn-view" (click)="verDetalhes(tutor.id!)">Ver Detalhes</button>
+        <button class="btn-edit" (click)="editarTutor(tutor.id!)">Editar</button>
+        <button class="btn-delete" (click)="deletarTutor(tutor.id!)">Excluir</button>
       </div>
     </div>
   </div>
 
-  <div *ngIf="!loading && tutores.length === 0" class="empty-state">
+  <!-- Nenhum resultado encontrado na busca -->
+  <div *ngIf="!loading && !errorMessage && termoBusca && tutoresFiltrados.length === 0" class="no-results">
+    <span class="no-results-icon">🔍</span>
+    <p>Nenhum tutor encontrado com "{{ termoBusca }}"</p>
+    <button class="btn-primary" (click)="limparBusca()">Limpar busca</button>
+  </div>
+
+  <!-- Nenhum tutor cadastrado -->
+  <div *ngIf="!loading && !errorMessage && !termoBusca && tutores.length === 0" class="empty-state">
     <p>Nenhum tutor cadastrado ainda.</p>
-    <button class="btn-primary" (click)="goToNewTutor()">Cadastrar Primeiro Tutor</button>
+    <button class="btn-primary" (click)="novoTutor()">Cadastrar primeiro tutor</button>
   </div>
 </div>

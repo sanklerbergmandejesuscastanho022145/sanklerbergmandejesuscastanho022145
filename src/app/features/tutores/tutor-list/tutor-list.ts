@@ -1,67 +1,123 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
-import { TutorService } from '../../../services/tutor.service';
+import { TutorService, Tutor } from '../../../services/tutor.service';
+import { AuthService } from '../../../services/auth.service';
 
 @Component({
-  selector: 'app-tutores-list',
+  selector: 'app-tutor-list',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, FormsModule],
   templateUrl: './tutor-list.html',
   styleUrls: ['./tutor-list.scss']
 })
 export class TutorListComponent implements OnInit {
-  tutores: any[] = [];
-  loading: boolean = false;
-  error: string = '';
+  tutores: Tutor[] = [];
+  tutoresFiltrados: Tutor[] = [];
+  loading = true;
+  errorMessage = '';
+  termoBusca = '';
 
   constructor(
     private tutorService: TutorService,
-    private router: Router
+    private router: Router,
+    private authService: AuthService,
+    private cdr: ChangeDetectorRef
   ) {}
 
   ngOnInit(): void {
-    this.loadTutores();
+    this.carregarTutores();
   }
 
-  loadTutores(): void {
+  carregarTutores(): void {
     this.loading = true;
-    this.tutorService.getAllTutores().subscribe({
+    this.errorMessage = '';
+    this.tutores = [];
+    this.tutoresFiltrados = [];
+    
+    this.tutorService.listarTutores().subscribe({
       next: (data) => {
-        this.tutores = data;
+        this.tutores = data || [];
+        this.tutoresFiltrados = [...this.tutores];
         this.loading = false;
+        this.errorMessage = '';
+        this.aplicarFiltro();
+        this.cdr.detectChanges();
       },
-      error: (err) => {
-        this.error = 'Erro ao carregar tutores';
+      error: (error) => {
+        console.error('Erro completo:', error);
+        
+        this.tutores = [];
+        this.tutoresFiltrados = [];
         this.loading = false;
-        console.error(err);
+        
+        if (error.status === 401) {
+          this.errorMessage = 'Sessão expirada. Faça login novamente.';
+          setTimeout(() => this.authService.logout(), 2000);
+        } else if (error.status === 404) {
+          this.errorMessage = 'Endpoint não encontrado. Verifique a URL da API.';
+        } else if (error.status === 0) {
+          this.errorMessage = 'Erro de conexão. Verifique sua internet ou se a API está disponível.';
+        } else {
+          this.errorMessage = 'Erro ao carregar tutores';
+        }
+        
+        this.cdr.detectChanges();
       }
     });
   }
 
-  viewDetails(id: number): void {
-    this.router.navigate(['/tutores', id]);
+  aplicarFiltro(): void {
+    if (!this.termoBusca.trim()) {
+      this.tutoresFiltrados = [...this.tutores];
+    } else {
+      const termo = this.termoBusca.toLowerCase().trim();
+      this.tutoresFiltrados = this.tutores.filter(tutor =>
+        tutor.nome.toLowerCase().includes(termo) ||
+        tutor.telefone.toLowerCase().includes(termo)
+      );
+    }
   }
 
-  editTutor(id: number): void {
-    this.router.navigate(['/tutores/editar', id]);
+  limparBusca(): void {
+    this.termoBusca = '';
+    this.aplicarFiltro();
   }
 
-  deleteTutor(id: number): void {
-    if (confirm('Deseja realmente excluir este tutor?')) {
-      this.tutorService.deleteTutor(id).subscribe({
+  verDetalhes(id: number): void {
+    if (id) {
+      this.router.navigate(['/tutores', id.toString()]);
+    }
+  }
+
+  editarTutor(id: number): void {
+    this.router.navigate(['/tutores', id, 'editar']);
+  }
+
+  novoTutor(): void {
+    this.router.navigate(['/tutores/novo']);
+  }
+
+  deletarTutor(id: number): void {
+    if (confirm('Deseja realmente deletar este tutor?')) {
+      this.tutorService.deletarTutor(id.toString()).subscribe({
         next: () => {
-          this.loadTutores();
+          this.carregarTutores();
         },
-        error: (err) => {
-          this.error = 'Erro ao excluir tutor';
-          console.error(err);
+        error: (error) => {
+          console.error('❌ Erro ao deletar:', error);
+          alert('Erro ao deletar tutor');
         }
       });
     }
   }
 
-  goToNewTutor(): void {
-    this.router.navigate(['/tutores/novo']);
+  voltarParaPets(): void {
+    this.router.navigate(['/pets']);
+  }
+
+  logout(): void {
+    this.authService.logout();
   }
 }

@@ -2,8 +2,34 @@
   <div class="pets-header">
     <h1>Lista de Pets</h1>
     <div class="header-actions">
+      <button class="btn-secondary" (click)="irParaTutores()">Tutores</button>
       <button class="btn-primary" (click)="novoPet()">Novo Pet</button>
       <button class="btn-logout" (click)="logout()">Sair</button>
+    </div>
+  </div>
+
+  <!-- Campo de Busca -->
+  <div class="search-container" *ngIf="!loading && !errorMessage">
+    <div class="search-box">
+      <span class="search-icon">🔍</span>
+      <input 
+        type="text" 
+        class="search-input" 
+        placeholder="Buscar pet por nome..."
+        [(ngModel)]="termoBusca"
+        (input)="aplicarFiltro()"
+      >
+      <button 
+        class="clear-button" 
+        *ngIf="termoBusca"
+        (click)="limparBusca()"
+        title="Limpar busca"
+      >
+        ✕
+      </button>
+    </div>
+    <div class="search-info" *ngIf="termoBusca">
+      <span>{{ petsFiltrados.length }} resultado(s) encontrado(s)</span>
     </div>
   </div>
 
@@ -17,9 +43,9 @@
     {{ errorMessage }}
   </div>
 
-  
-  <div class="pets-grid" *ngIf="!loading && !errorMessage && pets.length > 0">
-    <div class="pet-card" *ngFor="let pet of pets">
+  <!-- Grid de pets -->
+  <div class="pets-grid" *ngIf="!loading && !errorMessage && petsFiltrados.length > 0">
+    <div class="pet-card" *ngFor="let pet of petsFiltrados">
       <div class="pet-image" *ngIf="pet.foto?.url">
         <img [src]="pet.foto?.url || ''" [alt]="pet.nome">
       </div>
@@ -42,8 +68,15 @@
     </div>
   </div>
 
-  
-  <div *ngIf="!loading && !errorMessage && pets.length === 0" class="empty-state">
+  <!-- Nenhum resultado encontrado na busca -->
+  <div *ngIf="!loading && !errorMessage && termoBusca && petsFiltrados.length === 0" class="no-results">
+    <span class="no-results-icon">🔍</span>
+    <p>Nenhum pet encontrado com o nome "{{ termoBusca }}"</p>
+    <button class="btn-primary" (click)="limparBusca()">Limpar busca</button>
+  </div>
+
+  <!-- Nenhum pet cadastrado -->
+  <div *ngIf="!loading && !errorMessage && !termoBusca && pets.length === 0" class="empty-state">
     <p>Nenhum pet cadastrado ainda.</p>
     <button class="btn-primary" (click)="novoPet()">Cadastrar primeiro pet</button>
   </div>

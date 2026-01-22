@@ -1,74 +1,155 @@
 <div class="detail-container">
-  <div *ngIf="loading" class="loading">
-    Carregando...
+  <!-- Loading -->
+  <div *ngIf="isloading" class="loading">
+    ⏳ Carregando dados do tutor...
   </div>
 
-  <div *ngIf="error" class="error-message">
-    {{ error }}
+  <!-- Error Message -->
+  <div *ngIf="errorMessage" class="error-message">
+    <span>{{ errorMessage }}</span>
+    <button (click)="errorMessage = ''" style="background: none; border: none; cursor: pointer; font-size: 20px;">✖</button>
   </div>
 
-  <div *ngIf="tutor && !loading" class="tutor-detail">
+  <!-- Success Message -->
+  <div *ngIf="successMessage" class="success-message">
+    {{ successMessage }}
+  </div>
+
+  <!-- Tutor Detail -->
+  <div *ngIf="!isloading && tutor" class="tutor-detail">
+    <!-- Header with Back and Actions -->
     <div class="detail-header">
-      <h1>{{ tutor.nome }}</h1>
+      <button class="btn-back" (click)="voltar()">
+        ← Voltar
+      </button>
       <div class="header-actions">
-        <button class="btn-edit" (click)="editTutor()">Editar</button>
-        <button class="btn-delete" (click)="deleteTutor()">Excluir</button>
+        <button class="btn-edit" (click)="editarTutor()">
+          ✏️ Editar
+        </button>
+        <button class="btn-delete" (click)="deletarTutor()" [disabled]="tutor.pets && tutor.pets.length > 0">
+          🗑️ Excluir
+        </button>
       </div>
     </div>
 
-    <div class="detail-section">
-      <h3>Informações Pessoais</h3>
-      <div class="info-grid">
-        <div class="info-item">
-          <span class="label">CPF:</span>
-          <span class="value">{{ tutor.cpf }}</span>
-        </div>
-        <div class="info-item">
-          <span class="label">Email:</span>
-          <span class="value">{{ tutor.email }}</span>
-        </div>
-        <div class="info-item">
-          <span class="label">Telefone:</span>
-          <span class="value">{{ tutor.telefone }}</span>
-        </div>
+    <!-- Tutor Info Card -->
+    <div class="tutor-info-card">
+      <div class="tutor-photo">
+        <img *ngIf="tutor.foto" [src]="tutor.foto" [alt]="tutor.nome">
+        <div *ngIf="!tutor.foto" class="photo-placeholder">👤</div>
       </div>
-    </div>
 
-    <div class="detail-section" *ngIf="tutor.endereco || tutor.cidade || tutor. tutor.cep">
-      <h3>Endereço</h3>
-      <div class="info-grid">
-        <div class="info-item" *ngIf="tutor.endereco">
-          <span class="label">Endereço:</span>
-          <span class="value">{{ tutor.endereco }}</span>
-        </div>
-        <div class="info-item" *ngIf="tutor.cidade">
-          <span class="label">Cidade:</span>
-          <span class="value">{{ tutor.cidade }}</span>
-        </div>
-        <div class="info-item" *ngIf="tutor.estado">
-          <span class="label">Estado:</span>
-          <span class="value">{{ tutor.estado }}</span>
-        </div>
-        <div class="info-item" *ngIf="tutor.cep">
-          <span class="label">CEP:</span>
-          <span class="value">{{ tutor.cep }}</span>
-        </div>
-      </div>
-    </div>
+      <div class="tutor-data">
+        <h1>{{ tutor.nome }}</h1>
+        
+        <div class="info-grid">
+          <div class="info-item">
+            <span class="info-label">CPF:</span>
+            <span class="info-value">{{ tutor.cpf }}</span>
+          </div>
 
-    <div class="detail-section" *ngIf="tutor.pets && tutor.pets.length > 0">
-      <h3>Pets ({{ tutor.pets.length }})</h3>
-      <div class="pets-grid">
-        <div class="pet-card" *ngFor="let pet of tutor.pets">
-          <h4>{{ pet.nome }}</h4>
-          <p><strong>Espécie:</strong> {{ pet.<p><strong>Raça:</strong> {{ pet.raca }}</p>
-          <p *ngIf="pet.idade"><strong>Idade:</strong> {{ pet.idade }} anos</p>
+          <div class="info-item">
+            <span class="info-label">Telefone:</span>
+            <span class="info-value">{{ tutor.telefone }}</span>
+          </div>
+
+          <div class="info-item">
+            <span class="info-label">Email:</span>
+            <span class="info-value">{{ tutor.email || 'Não informado' }}</span>
+          </div>
+
+          <div class="info-item full-width">
+            <span class="info-label">Endereço:</span>
+            <span class="info-value">{{ tutor.endereco || 'Não informado' }}</span>
+          </div>
         </div>
       </div>
     </div>
 
-    <div class="detail-actions">
-      <button class="btn-back" (click)="goBack()">Voltar</button>
+    <!-- Pets Section -->
+    <div class="pets-section">
+      <div class="section-header">
+        <h2>🐾 Pets Vinculados</h2>
+        <button class="btn-vincular" (click)="abrirModalVincular()" [disabled]="loadingVincul">
+          {{ loadingVincul ? '⏳ Processando...' : '+ Vincular Pet' }}
+        </button>
+      </div>
+
+      <!-- Pets Grid -->
+      <div *ngIf="tutor.pets && tutor.pets.length > 0" class="pets-grid">
+        <div *ngFor="let pet of tutor.pets" class="pet-card">
+          <div class="pet-image" [class.empty-photo]="!pet.foto">
+            <img *ngIf="pet.foto" [src]="pet.foto" [alt]="pet.nome">
+            <span *ngIf="!pet.foto">🐾</span>
+          </div>
+
+          <div class="pet-info">
+            <h3>{{ pet.nome }}</h3>
+            <p><strong>Espécie:</strong> {{ pet.especie }}</p>
+            <p><strong>Raça:</strong> {{ pet.raca }}</p>
+            <p><strong>Idade:</strong> {{ pet.idade }} {{ pet.idade === 1 ? 'ano' : 'anos' }}</p>
+          </div>
+
+          <div class="pet-actions">
+            <button class="btn-view-pet" (click)="verPet(pet.id)" [disabled]="loadingVincul">
+              👁️ Ver Detalhes
+            </button>
+            <button class="btn-desvincular" (click)="desvincularPet(pet.id)" [disabled]="loadingVincul">
+              {{ loadingVincul ? '⏳' : '🔗' }} Desvincular
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Empty State -->
+      <div *ngIf="!tutor.pets || tutor.pets.length === 0" class="empty-pets">
+        <span class="empty-icon">🐾</span>
+        <p>Nenhum pet vinculado a este tutor ainda.</p>
+        <button class="btn-vincular-empty" (click)="abrirModalVincular()">
+          + Vincular Primeiro Pet
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal Vincular Pet -->
+  <div *ngIf="showVincularModal" class="modal-overlay" (click)="fecharModalVincular()">
+    <div class="modal-content" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h3>Vincular Pet ao Tutor</h3>
+        <button class="modal-close" (click)="fecharModalVincular()">✖</button>
+      </div>
+
+      <div class="modal-body">
+        <p class="modal-description">Selecione um pet disponível para vincular a este tutor:</p>
+        
+        <select 
+          *ngIf="petsDisponiveis.length > 0" 
+          class="pet-select" 
+          [(ngModel)]="petSelecionado"
+          [disabled]="loadingVincul">
+          <option value="">-- Selecione um pet --</option>
+          <option *ngFor="let pet of petsDisponiveis" [value]="pet.id">
+            {{ pet.nome }} ({{ pet.raca || 'Raça não informada' }})
+          </option>
+        </select>
+
+        <div *ngIf="petsDisponiveis.length === 0" class="no-pets-available">
+          ⚠️ Não há pets disponíveis para vinculação.
+        </div>
+      </div>
+
+      <div class="modal-actions">
+        <button class="btn-cancel-modal" (click)="fecharModalVincular()" [disabled]="loadingVincul">
+          Cancelar
+        </button>
+        <button 
+          class="btn-confirm-modal" 
+          (click)="vincularPet()" 
+          [disabled]="!petSelecionado || loadingVincul">
+          {{ loadingVincul ? '⏳ Vinculando...' : 'Confirmar Vinculação' }}
+        </button>
+      </div>
     </div>
   </div>
 </div>
