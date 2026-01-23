@@ -24,9 +24,12 @@ npm install
 ng serve --open
 
 ### PENDENTES DE SEGUIR PROJETO**
-tshoot pagina de detalhes do tutor(foto sem loading completo)
+tshoot buscar dados de edição do pet(dentro detalhes) ao clicar em editar
+
 VALIDAÇÃO DE RESPONSIVIDADE
 TESTES UNITARIOS
+● Empacotar artefato em container com todas as dependências isoladas.
+● README.md com documentação da arquitetura, dados de inscrição, vaga e como executar/testar.
 PAGINA DE REGISTRO(não obrigatorio)
 
 ### FINALIZADOS(ORDEM DE PRIORIDADE)
@@ -37,3 +40,5 @@ tela de detalhes do pet
 -ainda priorizar a finalização de paginas com relação ao pet
 pagina de pets: Busca por nome para filtrar
 PAGINA DE TUTORES
+tshoot pagina de detalhes do tutor(foto sem loading completo)
+tshoot buscar dados de edição do tutor(dentro detalhes) ao clicar em editar

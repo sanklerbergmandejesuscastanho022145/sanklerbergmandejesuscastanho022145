@@ -40,6 +40,11 @@ export class TutorDetailComponent implements OnInit {
     }
   }
 
+  getFotoUrl(foto: any): string | null {
+    if (!foto) return null;
+    return typeof foto === 'string' ? foto : foto.url || null;
+  }
+
   carregarTutor(): void {
   if (!this.tutorId) return;
 
@@ -70,10 +75,8 @@ export class TutorDetailComponent implements OnInit {
     this.router.navigate(['/tutores']);
   }
 
-  editarTutor(): void {
-    if (this.tutorId) {
-      this.router.navigate(['/tutores/editar', this.tutorId]);
-    }
+  editarTutor(id: number): void {
+    this.router.navigate(['/tutores', id, 'editar']);
   }
 
   deletarTutor(): void {

@@ -35,45 +35,50 @@ export class AuthService {
   }
 
   login(username: string, password: string): Observable<LoginResponse> {
-    return this.http.post<LoginResponse>(
-      `${this.API_URL}/autenticacao/login`,
-      { username, password }
-    ).pipe(
-      tap(response => {
-        localStorage.setItem('access_token', response.access_token);
-        this.isAuthenticatedSubject.next(true);
-  }));
+  return this.http.post<LoginResponse>(
+    `${this.API_URL}/autenticacao/login`,
+    { username, password }
+  ).pipe(
+    tap(response => {
+      localStorage.setItem('access_token', response.access_token);
+      if (response.refresh_token) {
+        localStorage.setItem('refresh_token', response.refresh_token);
+      }
+      this.isAuthenticatedSubject.next(true);
+    })
+  );
+}
+
+refreshToken(): Observable<LoginResponse> {
+  const refreshToken = localStorage.getItem('refresh_token');
+  
+  if (!refreshToken) {
+    this.logout();
+    return throwError(() => new Error('No refresh token available'));
   }
 
-  refreshToken(): Observable<LoginResponse> {
-    const refreshToken = localStorage.getItem('refresh_token');
-    
-    if (!refreshToken) {
+  return this.http.put<LoginResponse>(
+    `${this.API_URL}/autenticacao/refresh`,
+    { refresh_token: refreshToken }
+  ).pipe(
+    tap(response => {
+      localStorage.setItem('access_token', response.access_token);
+      if (response.refresh_token) {
+        localStorage.setItem('refresh_token', response.refresh_token);
+      }
+      this.isAuthenticatedSubject.next(true);
+    }),
+    catchError(error => {
+      console.error('Erro ao renovar token:', error);
       this.logout();
-      return throwError(() => new Error('No refresh token available'));
-    }
+      return throwError(() => error);
+    })
+  );
+}
 
-    return this.http.post<LoginResponse>(
-      `${this.API_URL}/autenticacao/refresh`,
-      { refresh_token: refreshToken }
-    ).pipe(
-      tap(response => {
-        localStorage.setItem('access_token', response.access_token);
-        if (response.refresh_token) {
-          localStorage.setItem('refresh_token', response.refresh_token);
-        }
-        this.isAuthenticatedSubject.next(true);
-      }),
-      catchError(error => {
-        console.error('Erro ao renovar token:', error);
-        this.logout();
-        return throwError(() => error);
-      })
-    );
-  }
-
-  logout(): void {
+logout(): void {
   localStorage.removeItem('access_token');
+  localStorage.removeItem('refresh_token');
   this.isAuthenticatedSubject.next(false);
   this.router.navigate(['/auth/login']);
 }

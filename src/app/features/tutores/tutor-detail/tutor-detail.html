@@ -23,7 +23,7 @@
         ← Voltar
       </button>
       <div class="header-actions">
-        <button class="btn-edit" (click)="editarTutor()">
+        <button class="btn-edit" (click)="editarTutor(tutor.id!)">
           ✏️ Editar
         </button>
         <button class="btn-delete" (click)="deletarTutor()" [disabled]="tutor.pets && tutor.pets.length > 0">
@@ -35,8 +35,8 @@
     <!-- Tutor Info Card -->
     <div class="tutor-info-card">
       <div class="tutor-photo">
-        <img *ngIf="tutor.foto" [src]="tutor.foto" [alt]="tutor.nome">
-        <div *ngIf="!tutor.foto" class="photo-placeholder">👤</div>
+        <img *ngIf="getFotoUrl(tutor.foto)" [src]="getFotoUrl(tutor.foto)" [alt]="tutor.nome">
+        <div *ngIf="!getFotoUrl(tutor.foto)" class="photo-placeholder">👤</div>
       </div>
 
       <div class="tutor-data">
@@ -77,11 +77,14 @@
 
       <!-- Pets Grid -->
       <div *ngIf="tutor.pets && tutor.pets.length > 0" class="pets-grid">
-        <div *ngFor="let pet of tutor.pets" class="pet-card">
-          <div class="pet-image" [class.empty-photo]="!pet.foto">
-            <img *ngIf="pet.foto" [src]="pet.foto" [alt]="pet.nome">
-            <span *ngIf="!pet.foto">🐾</span>
-          </div>
+      <div *ngFor="let pet of tutor.pets" class="pet-card">
+      <div class="pet-image" [class.empty-photo]="!getFotoUrl(pet.foto)">
+      <img 
+        *ngIf="getFotoUrl(pet.foto)" 
+        [src]="getFotoUrl(pet.foto)" 
+        [alt]="pet.nome">
+      <span *ngIf="!getFotoUrl(pet.foto)">🐾</span>
+      </div>
 
           <div class="pet-info">
             <h3>{{ pet.nome }}</h3>
