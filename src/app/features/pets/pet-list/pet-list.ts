@@ -100,7 +100,7 @@ export class PetsListComponent implements OnInit {
 
   deletarPet(id: number): void {
     if (confirm('Deseja realmente deletar este pet?')) {
-      this.petsService.deletarPet(id.toString()).subscribe({
+      this.petsService.deletarPet(id).subscribe({
         next: () => {
           this.carregarPets();
         },

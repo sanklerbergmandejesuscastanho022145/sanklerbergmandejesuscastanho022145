@@ -24,7 +24,7 @@ npm install
 ng serve --open
 
 ### PENDENTES DE SEGUIR PROJETO**
-tshoot buscar dados de edição do pet(dentro detalhes) ao clicar em editar
+
 
 VALIDAÇÃO DE RESPONSIVIDADE
 TESTES UNITARIOS
@@ -42,3 +42,4 @@ pagina de pets: Busca por nome para filtrar
 PAGINA DE TUTORES
 tshoot pagina de detalhes do tutor(foto sem loading completo)
 tshoot buscar dados de edição do tutor(dentro detalhes) ao clicar em editar
+tshoot buscar dados de edição do pet(dentro detalhes) ao clicar em editar

@@ -1,7 +1,7 @@
 import { Component, OnInit, ChangeDetectorRef, NgZone } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
-import { Router } from '@angular/router';
+import { Router, ActivatedRoute } from '@angular/router'; // ✅ ADICIONAR ActivatedRoute
 import { PetsService } from '../../../services/pets.service';
 import { HttpEventType } from '@angular/common/http';
 
@@ -19,22 +19,68 @@ export class PetFormComponent implements OnInit {
   selectedFile: File | null = null;
   fotoPreview: string | null = null;
   uploadProgress = 0;
+  petId: number | null = null; // ✅ ADICIONAR para armazenar o ID
+  isEditMode = false; // ✅ ADICIONAR para controlar modo edição
 
   constructor(
     private fb: FormBuilder,
     private petsService: PetsService,
     private router: Router,
+    private route: ActivatedRoute, // ✅ ADICIONAR ActivatedRoute
     private ngZone: NgZone,
     private cdr: ChangeDetectorRef
   ) {}
 
   ngOnInit(): void {
+    // ✅ Inicializa o formulário
     this.petForm = this.fb.group({
       nome: ['', [Validators.required, Validators.minLength(2)]],
       especie: ['', Validators.required],
       raca: [''],
       idade: [null, [Validators.required, Validators.min(0), Validators.max(50)]],
       tutorId: ['', Validators.required]
+    });
+
+    // ✅ ADICIONAR: Captura o ID da rota
+    const id = this.route.snapshot.paramMap.get('id');
+    
+    if (id) {
+      this.petId = +id;
+      this.isEditMode = true;
+      this.carregarDadosPet();
+    }
+  }
+
+  // ✅ ADICIONAR: Método para carregar dados do pet
+  carregarDadosPet(): void {
+    if (!this.petId) return;
+
+    this.isLoading = true;
+    this.petsService.obterPetPorId(this.petId).subscribe({
+      next: (pet) => {
+        console.log('Pet carregado para edição:', pet);
+        
+        // Preenche o formulário com os dados do pet
+        this.petForm.patchValue({
+          nome: pet.nome,
+          especie: pet.raca,
+          raca: pet.raca || '',
+          idade: pet.idade,
+          //tutorId: pet.tutorId
+        });
+
+        // Carrega a foto se existir
+        if (pet.foto?.url) {
+          this.fotoPreview = pet.foto.url;
+        }
+
+        this.isLoading = false;
+      },
+      error: (error) => {
+        console.error('Erro ao carregar pet:', error);
+        this.errorMessage = 'Erro ao carregar dados do pet';
+        this.isLoading = false;
+      }
     });
   }
 
@@ -56,7 +102,6 @@ export class PetFormComponent implements OnInit {
       this.selectedFile = file;
       this.errorMessage = '';
       
-      
       this.ngZone.run(() => {
         this.uploadProgress = 0;
         this.fotoPreview = null;
@@ -67,8 +112,6 @@ export class PetFormComponent implements OnInit {
       
       reader.onprogress = (e: ProgressEvent<FileReader>) => {
         if (e.lengthComputable) {
-          
-          
           this.ngZone.run(() => {
             this.uploadProgress = Math.round((e.loaded / e.total) * 100);
             this.cdr.detectChanges();
@@ -78,14 +121,11 @@ export class PetFormComponent implements OnInit {
       
       reader.onload = (e: ProgressEvent<FileReader>) => {
         if (e.target && e.target.result) {
-          
-          
           this.ngZone.run(() => {
             this.fotoPreview = e.target?.result as string;
             this.uploadProgress = 100;
             this.cdr.detectChanges();
             
-            // atualiza barra após 5segs
             setTimeout(() => {
               this.uploadProgress = 0;
               this.cdr.detectChanges();
@@ -119,47 +159,104 @@ export class PetFormComponent implements OnInit {
       this.isLoading = true;
       this.errorMessage = '';
 
-      this.petsService.criarPet(this.petForm.value).subscribe({
-        next: (petCriado: any) => {
-          
-          if (this.selectedFile && petCriado.id) {
-            this.uploadProgress = 0;
-            
-            this.petsService.uploadFotoPet(petCriado.id, this.selectedFile).subscribe({
-              next: (event: any) => {
-                if (event.type === HttpEventType.UploadProgress) {
-                  if (event.total) {
-                    this.uploadProgress = Math.round((100 * event.loaded) / event.total);
-                  }
-                } else if (event.type === HttpEventType.Response) {
-                  this.uploadProgress = 100;
-                  setTimeout(() => {
-                    this.router.navigate(['/pets']);
-                  }, 500);
-                }
-              },
-              error: (error: any) => {
-                this.isLoading = false;
-                this.uploadProgress = 0;
-                this.errorMessage = 'Pet cadastrado, mas erro ao enviar foto. Tente novamente mais tarde.';
-                console.error('Erro no upload da foto:', error);
-                setTimeout(() => this.router.navigate(['/pets']), 2000);
-              }
-            });
-          } else {
-            this.router.navigate(['/pets']);
-          }
-        },
-        error: (error: any) => {
-          this.isLoading = false;
-          this.uploadProgress = 0;
-          this.errorMessage = 'Erro ao cadastrar pet. Tente novamente.';
-          console.error('Erro:', error);
-        }
-      });
+      // ✅ MODIFICAR: Verifica se é edição ou cadastro
+      if (this.isEditMode && this.petId) {
+        // Modo edição
+        this.atualizarPet();
+      } else {
+        // Modo cadastro
+        this.cadastrarPet();
+      }
     } else {
       this.petForm.markAllAsTouched();
     }
+  }
+
+  // ✅ ADICIONAR: Método para cadastrar novo pet
+  private cadastrarPet(): void {
+    this.petsService.criarPet(this.petForm.value).subscribe({
+      next: (petCriado: any) => {
+        if (this.selectedFile && petCriado.id) {
+          this.uploadProgress = 0;
+          
+          this.petsService.uploadFotoPet(petCriado.id, this.selectedFile).subscribe({
+            next: (event: any) => {
+              if (event.type === HttpEventType.UploadProgress) {
+                if (event.total) {
+                  this.uploadProgress = Math.round((100 * event.loaded) / event.total);
+                }
+              } else if (event.type === HttpEventType.Response) {
+                this.uploadProgress = 100;
+                setTimeout(() => {
+                  this.router.navigate(['/pets']);
+                }, 500);
+              }
+            },
+            error: (error: any) => {
+              this.isLoading = false;
+              this.uploadProgress = 0;
+              this.errorMessage = 'Pet cadastrado, mas erro ao enviar foto.';
+              console.error('Erro no upload da foto:', error);
+              setTimeout(() => this.router.navigate(['/pets']), 2000);
+            }
+          });
+        } else {
+          this.router.navigate(['/pets']);
+        }
+      },
+      error: (error: any) => {
+        this.isLoading = false;
+        this.uploadProgress = 0;
+        this.errorMessage = 'Erro ao cadastrar pet. Tente novamente.';
+        console.error('Erro:', error);
+      }
+    });
+  }
+
+  // ✅ ADICIONAR: Método para atualizar pet existente
+  private atualizarPet(): void {
+    if (!this.petId) return;
+
+    this.petsService.atualizarPet(this.petId, this.petForm.value).subscribe({
+      next: (petAtualizado: any) => {
+        // Se selecionou nova foto, faz upload
+        if (this.selectedFile) {
+          this.uploadProgress = 0;
+
+          
+          
+          this.petsService.uploadFotoPet(this.petId!.toString(), this.selectedFile).subscribe({
+            next: (event: any) => {
+              if (event.type === HttpEventType.UploadProgress) {
+                if (event.total) {
+                  this.uploadProgress = Math.round((100 * event.loaded) / event.total);
+                }
+              } else if (event.type === HttpEventType.Response) {
+                this.uploadProgress = 100;
+                setTimeout(() => {
+                  this.router.navigate(['/pets']);
+                }, 500);
+              }
+            },
+            error: (error: any) => {
+              this.isLoading = false;
+              this.uploadProgress = 0;
+              this.errorMessage = 'Pet atualizado, mas erro ao enviar foto.';
+              console.error('Erro no upload da foto:', error);
+              setTimeout(() => this.router.navigate(['/pets']), 2000);
+            }
+          });
+        } else {
+          // Sem foto nova, apenas redireciona
+          this.router.navigate(['/pets']);
+        }
+      },
+      error: (error: any) => {
+        this.isLoading = false;
+        this.errorMessage = 'Erro ao atualizar pet. Tente novamente.';
+        console.error('Erro:', error);
+      }
+    });
   }
 
   onCancel(): void {

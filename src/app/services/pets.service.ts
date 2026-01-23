@@ -66,7 +66,7 @@ export class PetsService {
     );
   }
 
-  obterPetPorId(id: string): Observable<Pet> {
+  obterPetPorId(id: number): Observable<Pet> {
     return this.http.get<Pet>(`${this.API_URL}/v1/pets/${id}`, {
       headers: this.getHeaders()
     }).pipe(
@@ -122,7 +122,7 @@ export class PetsService {
     );
   }
 
-  deletarPet(id: string): Observable<void> {
+  deletarPet(id: number): Observable<void> {
     return this.http.delete<void>(`${this.API_URL}/v1/pets/${id}`, {
       headers: this.getHeaders()
     }).pipe(

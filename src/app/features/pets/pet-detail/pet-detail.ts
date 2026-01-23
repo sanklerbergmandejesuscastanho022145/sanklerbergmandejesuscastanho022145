@@ -16,7 +16,7 @@ export class PetDetailComponent implements OnInit, OnDestroy {
   pet: Pet | null = null;
   isLoading = false;
   errorMessage = '';
-  petId!: string;
+  petId!: number;
   imageUrl = '/assets/pet-placeholder.png';
   private routeSub?: Subscription;
   private petSub?: Subscription;
@@ -33,7 +33,7 @@ export class PetDetailComponent implements OnInit, OnDestroy {
     const id = this.route.snapshot.paramMap.get('id');
 
     if (id && this.isValidId(id)) {
-      this.petId = id;
+      this.petId = +id;
       this.carregarDetalhesPet();
     } else {
       this.errorMessage = 'ID do pet inválido';
@@ -100,10 +100,9 @@ export class PetDetailComponent implements OnInit, OnDestroy {
     this.router.navigate(['/pets']);
   }
 
-  editarPet(): void {
-    if (!this.petId) return;
-    this.router.navigate(['/pets', this.petId, 'editar']);
-  }
+  editarPet(id: number): void {
+  this.router.navigate(['/pets', id, 'editar']);
+}
 
   excluirPet(): void {
     if (!this.pet) return;
