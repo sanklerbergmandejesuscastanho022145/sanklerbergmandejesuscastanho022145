@@ -38,7 +38,6 @@ export class PetFormComponent implements OnInit {
       especie: ['', Validators.required],
       raca: [''],
       idade: [null, [Validators.required, Validators.min(0), Validators.max(50)]],
-      tutorId: ['', Validators.required]
     });
 
     // ✅ ADICIONAR: Captura o ID da rota
@@ -66,7 +65,6 @@ export class PetFormComponent implements OnInit {
           especie: pet.raca,
           raca: pet.raca || '',
           idade: pet.idade,
-          //tutorId: pet.tutorId
         });
 
         // Carrega a foto se existir

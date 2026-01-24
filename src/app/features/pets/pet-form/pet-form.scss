@@ -1,341 +1,362 @@
-// Paleta de cores da bandeira de Mato Grosso
-$mt-azul: #003DA5;        // Azul
-$mt-branco: #FFFFFF;      // Branco
-$mt-verde: #009B3A;       // Verde
-$mt-amarelo: #FFD100;     // Amarelo
-$mt-azul-claro: #4A90E2;  // Azul claro para variações
+$mt-azul: #003DA5;
+$mt-branco: #FFFFFF;
+$mt-verde: #009B3A;
+$mt-amarelo: #FFD100;
+$mt-azul-claro: #4A90E2;
 
 .container {
-  max-width: 600px;
-  margin: 40px auto;
+  max-width: 800px;
+  margin: 0 auto;
   padding: 20px;
-}
+  font-family: Arial, sans-serif;
+  background: linear-gradient(180deg, $mt-branco 0%, #f5f5f5 100%);
+  min-height: 100vh;
 
-.form-card {
-  background: $mt-branco;
-  border-radius: 8px;
-  box-shadow: 0 2px 8px rgba(0, 61, 165, 0.15);
-  padding: 30px;
-  border-top: 4px solid $mt-azul;
-}
-
-h2 {
-  margin-bottom: 30px;
-  color: $mt-azul;
-  font-size: 24px;
-  text-align: center;
-  font-weight: 600;
-}
-
-.form-group {
-  margin-bottom: 20px;
-}
-
-label {
-  display: block;
-  margin-bottom: 8px;
-  color: $mt-azul;
-  font-weight: 500;
-  font-size: 14px;
-}
-
-input, select {
-  width: 100%;
-  padding: 10px 12px;
-  border: 2px solid lighten($mt-azul-claro, 25%);
-  border-radius: 4px;
-  font-size: 14px;
-  transition: all 0.3s ease;
-  box-sizing: border-box;
-  
-  &::placeholder {
-    color: #999;
-  }
-}
-
-input:focus, select:focus {
-  outline: none;
-  border-color: $mt-azul;
-  box-shadow: 0 0 0 3px rgba(0, 61, 165, 0.1);
-}
-
-input.error, select.error {
-  border-color: #f44336;
-  
-  &:focus {
-    box-shadow: 0 0 0 3px rgba(244, 67, 54, 0.1);
-  }
-}
-
-.error-message {
-  color: #f44336;
-  font-size: 12px;
-  display: block;
-  margin-top: 4px;
-}
-
-.error-alert {
-  background-color: #ffebee;
-  color: #c62828;
-  padding: 12px;
-  border-radius: 4px;
-  margin-bottom: 20px;
-  border-left: 4px solid #f44336;
-  animation: slideIn 0.3s ease;
-}
-
-.photo-upload-area {
-  margin-top: 8px;
-}
-
-.photo-preview {
-  position: relative;
-  width: 200px;
-  height: 200px;
-  border-radius: 8px;
-  overflow: hidden;
-  border: 2px solid $mt-azul-claro;
-  margin-bottom: 12px;
-  
-  img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-  }
-  
-  .btn-remove-photo {
-    position: absolute;
-    top: 8px;
-    right: 8px;
-    background-color: rgba(244, 67, 54, 0.9);
-    color: $mt-branco;
-    border: none;
-    border-radius: 50%;
-    width: 30px;
-    height: 30px;
-    cursor: pointer;
-    font-size: 18px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: all 0.3s ease;
-    
-    &:hover {
-      background-color: #f44336;
-      transform: scale(1.1);
-    }
-  }
-}
-
-// Estilos da barra de progresso
-.upload-progress {
-  margin: 12px 0;
-  
-  .progress-bar {
-    width: 100%;
-    height: 24px;
-    background-color: lighten($mt-azul-claro, 35%);
+  .form-card {
+    background: $mt-branco;
     border-radius: 12px;
-    overflow: hidden;
-    border: 2px solid $mt-azul-claro;
-    position: relative;
-    
-    .progress-fill {
-      height: 100%;
-      background: linear-gradient(90deg, $mt-verde 0%, lighten($mt-verde, 10%) 100%);
-      transition: width 0.3s ease;
-      border-radius: 10px;
-      position: relative;
-      
-      &::after {
-        content: '';
-        position: absolute;
-        top: 0;
-        left: 0;
-        bottom: 0;
-        right: 0;
-        background: linear-gradient(
-          90deg,
-          transparent,
-          rgba(255, 255, 255, 0.3),
-          transparent
-        );
-        animation: shimmer 1.5s infinite;
-      }
-    }
-  }
-  
-  .progress-text {
-    display: block;
-    text-align: center;
-    margin-top: 8px;
-    font-size: 13px;
-    font-weight: 500;
-    color: $mt-azul;
-  }
-}
+    padding: 30px;
+    box-shadow: 0 4px 16px rgba(0, 155, 58, 0.1);
 
-@keyframes shimmer {
-  0% {
-    transform: translateX(-100%);
-  }
-  100% {
-    transform: translateX(100%);
-  }
-}
-
-.btn-upload {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  padding: 12px 24px;
-  background-color: lighten($mt-azul-claro, 35%);
-  color: $mt-azul;
-  border: 2px dashed $mt-azul-claro;
-  border-radius: 4px;
-  font-size: 14px;
-  font-weight: 500;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  
-  &:hover {
-    background-color: lighten($mt-verde, 45%);
-    border-color: $mt-verde;
-    color: $mt-verde;
-  }
-}
-
-.info-message {
-  color: #666;
-  font-size: 12px;
-  margin-top: 4px;
-  display: block;
-  font-style: italic;
-}
-
-@keyframes slideIn {
-  from {
-    opacity: 0;
-    transform: translateY(-10px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-.button-group {
-  display: flex;
-  gap: 12px;
-  margin-top: 30px;
-}
-
-.btn-cancel, .btn-submit {
-  flex: 1;
-  padding: 12px 24px;
-  border: none;
-  border-radius: 4px;
-  font-size: 16px;
-  font-weight: 500;
-  cursor: pointer;
-  transition: all 0.3s ease;
-}
-
-.btn-cancel {
-  background-color: #f5f5f5;
-  color: #666;
-  border: 2px solid #ddd;
-  
-  &:hover:not(:disabled) {
-    background-color: #e0e0e0;
-    border-color: #bbb;
-    transform: translateY(-1px);
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  }
-  
-  &:active:not(:disabled) {
-    transform: translateY(0);
-  }
-  
-  &:disabled {
-    opacity: 0.6;
-    cursor: not-allowed;
-  }
-}
-
-.btn-submit {
-  background: linear-gradient(135deg, $mt-verde 0%, darken($mt-verde, 10%) 100%);
-  color: $mt-branco;
-  border: 2px solid $mt-verde;
-  
-  &:hover:not(:disabled) {
-    background: linear-gradient(135deg, darken($mt-verde, 5%) 0%, darken($mt-verde, 15%) 100%);
-    transform: translateY(-1px);
-    box-shadow: 0 4px 8px rgba(0, 155, 58, 0.3);
-  }
-  
-  &:active:not(:disabled) {
-    transform: translateY(0);
-  }
-  
-  &:disabled {
-    opacity: 0.6;
-    cursor: not-allowed;
-    background: lighten($mt-verde, 20%);
-  }
-}
-
-.photo-upload-area {
-  position: relative;
-  
-  .photo-preview-container {
-    position: relative;
-    display: inline-block;
-  }
-  
-  .loading-overlay {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    width: 80%;
-    z-index: 10;
-    background: rgba(0, 0, 0, 0.8);
-    padding: 15px;
-    border-radius: 8px;
-    text-align: center;
-    
-    .progress-bar {
-      width: 100%;
-      height: 25px;
-      background: rgba(255, 255, 255, 0.2);
-      border-radius: 12px;
-      overflow: hidden;
-      margin-bottom: 8px;
-      
-      .progress-fill {
-        height: 100%;
-        background: linear-gradient(90deg, #4CAF50, #8BC34A);
-        transition: width 0.3s ease;
-        border-radius: 12px;
-      }
-    }
-    
-    .progress-text {
-      color: white;
-      font-size: 14px;
+    h2 {
+      margin: 0 0 30px 0;
+      color: $mt-verde;
+      font-size: 28px;
       font-weight: 600;
+      text-align: center;
+      padding: 20px;
+      border-radius: 12px;
+      background: linear-gradient(135deg, $mt-verde 0%, darken($mt-verde, 10%) 100%);
+      color: $mt-branco;
+      text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+      box-shadow: 0 4px 12px rgba(0, 155, 58, 0.2);
+    }
+
+    form {
+      .form-group {
+        margin-bottom: 20px;
+
+        label {
+          display: block;
+          margin-bottom: 8px;
+          color: $mt-verde;
+          font-weight: 600;
+          font-size: 14px;
+        }
+
+        &.photo-section {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        
+        label {
+          font-size: 18px;
+          text-align: center;
+          margin-bottom: 20px;
+        }
+        }
+
+        input,
+        select {
+          width: 100%;
+          padding: 12px 16px;
+          border: 2px solid lighten($mt-verde, 40%);
+          border-radius: 8px;
+          font-size: 15px;
+          color: $mt-azul;
+          transition: all 0.3s ease;
+          font-family: Arial, sans-serif;
+          box-sizing: border-box;
+
+          &:focus {
+            outline: none;
+            border-color: $mt-verde;
+            box-shadow: 0 0 0 3px rgba(0, 155, 58, 0.1);
+          }
+
+          &::placeholder {
+            color: lighten($mt-verde, 30%);
+          }
+
+          &.error {
+            border-color: #f44336;
+
+            &:focus {
+              box-shadow: 0 0 0 3px rgba(244, 67, 54, 0.1);
+            }
+          }
+        }
+
+        select {
+          cursor: pointer;
+          background-color: $mt-branco;
+        }
+
+        small {
+          display: block;
+          margin-top: 5px;
+          font-size: 12px;
+
+          &.error-message {
+            color: #f44336;
+            font-weight: 500;
+          }
+
+          &.info-message {
+            color: lighten($mt-verde, 20%);
+            font-style: italic;
+          }
+        }
+
+        // ✅ AJUSTADO: Área de upload igual ao tutor-form
+        .photo-upload-area {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          gap: 15px;
+
+          // Preview da foto COM foto selecionada
+          .photo-preview {
+            position: relative;
+            width: 200px;
+            height: 200px;
+            border-radius: 12px;
+            overflow: hidden;
+            border: 4px solid $mt-verde;
+            box-shadow: 0 4px 12px rgba(0, 155, 58, 0.3);
+
+            img {
+              width: 100%;
+              height: 100%;
+              object-fit: cover;
+            }
+
+            .btn-remove-photo {
+              position: absolute;
+              top: 10px;
+              right: 10px;
+              background: rgba(255, 255, 255, 0.95);
+              color: #f44336;
+              border: none;
+              border-radius: 50%;
+              width: 32px;
+              height: 32px;
+              font-size: 18px;
+              font-weight: bold;
+              cursor: pointer;
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              transition: all 0.3s ease;
+              box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+
+              &:hover {
+                background: #f44336;
+                color: $mt-branco;
+                transform: scale(1.1);
+              }
+            }
+          }
+
+          // Placeholder SEM foto selecionada
+          .photo-placeholder {
+            width: 200px;
+            height: 200px;
+            border-radius: 12px;
+            background: linear-gradient(135deg, lighten($mt-verde, 50%) 0%, lighten($mt-verde, 60%) 100%);
+            border: 4px dashed $mt-verde;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+
+            .photo-icon {
+              font-size: 64px;
+              opacity: 0.6;
+            }
+
+            p {
+              margin: 0;
+              color: $mt-verde;
+              font-size: 14px;
+              font-weight: 500;
+            }
+          }
+
+          .btn-upload {
+            background: $mt-verde;
+            color: $mt-branco;
+            padding: 12px 30px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 8px rgba(0, 155, 58, 0.3);
+
+            &:hover {
+              background: darken($mt-verde, 10%);
+              transform: translateY(-2px);
+              box-shadow: 0 4px 12px rgba(0, 155, 58, 0.5);
+            }
+
+            &:active {
+              transform: translateY(0);
+            }
+          }
+
+          .photo-hint {
+            color: lighten($mt-verde, 20%);
+            font-size: 12px;
+            font-style: italic;
+          }
+        }
+
+        // ✅ ADICIONADO: Barra de progresso fora do container (igual tutor-form)
+        .upload-progress {
+          margin-top: 15px;
+          width: 100%;
+          max-width: 300px;
+
+          .progress-bar {
+            width: 100%;
+            height: 24px;
+            background: lighten($mt-verde, 60%);
+            border-radius: 12px;
+            overflow: hidden;
+            border: 2px solid $mt-verde;
+
+            .progress-fill {
+              height: 100%;
+              background: linear-gradient(90deg, $mt-verde 0%, darken($mt-verde, 10%) 100%);
+              transition: width 0.3s ease;
+              display: flex;
+              align-items: center;
+              justify-content: center;
+            }
+          }
+
+          .progress-text {
+            display: block;
+            text-align: center;
+            margin-top: 8px;
+            color: $mt-verde;
+            font-size: 14px;
+            font-weight: 600;
+          }
+        }
+      }
+
+      .error-alert {
+        padding: 15px 20px;
+        background-color: lighten($mt-amarelo, 30%);
+        border-left: 4px solid darken($mt-verde, 10%);
+        color: darken($mt-verde, 20%);
+        border-radius: 8px;
+        margin-bottom: 20px;
+        font-weight: 500;
+        animation: slideDown 0.3s ease;
+      }
+
+      .button-group {
+        display: flex;
+        gap: 15px;
+        justify-content: flex-end;
+        margin-top: 30px;
+        padding-top: 20px;
+        border-top: 2px solid lighten($mt-verde, 50%);
+
+        button {
+          padding: 12px 30px;
+          border: none;
+          border-radius: 8px;
+          font-size: 16px;
+          font-weight: 600;
+          cursor: pointer;
+          transition: all 0.3s ease;
+
+          &:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+          }
+
+          &:not(:disabled):active {
+            transform: scale(0.98);
+          }
+        }
+
+        .btn-cancel {
+          background: $mt-branco;
+          color: $mt-verde;
+          border: 2px solid $mt-verde;
+
+          &:hover:not(:disabled) {
+            background: lighten($mt-verde, 60%);
+          }
+        }
+
+        .btn-submit {
+          background: linear-gradient(135deg, $mt-verde 0%, darken($mt-verde, 10%) 100%);
+          color: $mt-branco;
+          box-shadow: 0 2px 8px rgba(0, 155, 58, 0.3);
+
+          &:hover:not(:disabled) {
+            background: linear-gradient(135deg, darken($mt-verde, 5%) 0%, darken($mt-verde, 15%) 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 155, 58, 0.5);
+          }
+        }
+      }
     }
   }
-  
-  .photo-preview {
-    position: relative;
-    display: inline-block;
-    
-    img {
-      max-width: 200px;
-      max-height: 200px;
-      border-radius: 8px;
+
+  @keyframes slideDown {
+    from {
+      opacity: 0;
+      transform: translateY(-10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @media (max-width: 768px) {
+    padding: 15px;
+
+    .form-card {
+      padding: 20px;
+
+      h2 {
+        font-size: 24px;
+        padding: 15px;
+      }
+
+      form {
+        .form-group {
+          .photo-upload-area {
+            .photo-preview,
+            .photo-placeholder {
+              width: 150px;
+              height: 150px;
+            }
+
+            .photo-placeholder .photo-icon {
+              font-size: 48px;
+            }
+          }
+        }
+
+        .button-group {
+          flex-direction: column;
+
+          button {
+            width: 100%;
+          }
+        }
+      }
     }
   }
 }
