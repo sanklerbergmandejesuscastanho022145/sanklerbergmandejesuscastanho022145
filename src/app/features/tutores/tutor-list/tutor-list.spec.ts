@@ -1,20 +1,19 @@
+// src/app/features/tutores/tutor-list/tutor-list.spec.ts
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { TutorListComponent } from './tutor-list';
 
-import { TutorList } from './tutor-list';
-
-describe('TutorList', () => {
-  let component: TutorList;
-  let fixture: ComponentFixture<TutorList>;
+describe('TutorListComponent', () => {
+  let component: TutorListComponent;
+  let fixture: ComponentFixture<TutorListComponent>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [TutorList]
-    })
-    .compileComponents();
+      imports: [TutorListComponent]
+    }).compileComponents();
 
-    fixture = TestBed.createComponent(TutorList);
+    fixture = TestBed.createComponent(TutorListComponent);
     component = fixture.componentInstance;
-    await fixture.whenStable();
+    fixture.detectChanges();
   });
 
   it('should create', () => {

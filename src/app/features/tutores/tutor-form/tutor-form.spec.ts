@@ -1,20 +1,19 @@
+// src/app/features/tutores/tutor-form/tutor-form.spec.ts
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { TutorFormComponent } from './tutor-form';
 
-import { TutorForm } from './tutor-form';
-
-describe('TutorForm', () => {
-  let component: TutorForm;
-  let fixture: ComponentFixture<TutorForm>;
+describe('TutorFormComponent', () => {
+  let component: TutorFormComponent;
+  let fixture: ComponentFixture<TutorFormComponent>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [TutorForm]
-    })
-    .compileComponents();
+      imports: [TutorFormComponent]
+    }).compileComponents();
 
-    fixture = TestBed.createComponent(TutorForm);
+    fixture = TestBed.createComponent(TutorFormComponent);
     component = fixture.componentInstance;
-    await fixture.whenStable();
+    fixture.detectChanges();
   });
 
   it('should create', () => {

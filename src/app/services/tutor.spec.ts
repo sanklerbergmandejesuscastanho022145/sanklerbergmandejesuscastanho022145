@@ -1,13 +1,13 @@
+// src/app/services/tutor.spec.ts
 import { TestBed } from '@angular/core/testing';
+import { TutorService } from './tutor.service';
 
-import { Tutor } from './tutor';
-
-describe('Tutor', () => {
-  let service: Tutor;
+describe('TutoresService', () => {
+  let service: TutorService;
 
   beforeEach(() => {
     TestBed.configureTestingModule({});
-    service = TestBed.inject(Tutor);
+    service = TestBed.inject(TutorService);
   });
 
   it('should be created', () => {

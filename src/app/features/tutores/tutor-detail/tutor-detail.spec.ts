@@ -1,20 +1,19 @@
+// src/app/features/tutores/tutor-detail/tutor-detail.spec.ts
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { TutorDetailComponent } from './tutor-detail';
 
-import { TutorDetail } from './tutor-detail';
-
-describe('TutorDetail', () => {
-  let component: TutorDetail;
-  let fixture: ComponentFixture<TutorDetail>;
+describe('TutorDetailComponent', () => {
+  let component: TutorDetailComponent;
+  let fixture: ComponentFixture<TutorDetailComponent>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [TutorDetail]
-    })
-    .compileComponents();
+      imports: [TutorDetailComponent]
+    }).compileComponents();
 
-    fixture = TestBed.createComponent(TutorDetail);
+    fixture = TestBed.createComponent(TutorDetailComponent);
     component = fixture.componentInstance;
-    await fixture.whenStable();
+    fixture.detectChanges();
   });
 
   it('should create', () => {
