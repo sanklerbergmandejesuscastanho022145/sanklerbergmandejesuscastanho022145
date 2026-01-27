@@ -1,7 +1,7 @@
 import { Component, OnInit, ChangeDetectorRef, NgZone } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
-import { Router, ActivatedRoute } from '@angular/router'; // ✅ ADICIONAR ActivatedRoute
+import { Router, ActivatedRoute } from '@angular/router';
 import { PetsService } from '../../../services/pets.service';
 import { HttpEventType } from '@angular/common/http';
 
@@ -19,14 +19,14 @@ export class PetFormComponent implements OnInit {
   selectedFile: File | null = null;
   fotoPreview: string | null = null;
   uploadProgress = 0;
-  petId: number | null = null; // ✅ ADICIONAR para armazenar o ID
-  isEditMode = false; // ✅ ADICIONAR para controlar modo edição
+  petId: number | null = null;
+  isEditMode = false;
 
   constructor(
     private fb: FormBuilder,
     private petsService: PetsService,
     private router: Router,
-    private route: ActivatedRoute, // ✅ ADICIONAR ActivatedRoute
+    private route: ActivatedRoute,
     private ngZone: NgZone,
     private cdr: ChangeDetectorRef
   ) {}
@@ -159,10 +159,10 @@ export class PetFormComponent implements OnInit {
 
       // ✅ MODIFICAR: Verifica se é edição ou cadastro
       if (this.isEditMode && this.petId) {
-        // Modo edição
+        
         this.atualizarPet();
       } else {
-        // Modo cadastro
+        
         this.cadastrarPet();
       }
     } else {
@@ -170,7 +170,7 @@ export class PetFormComponent implements OnInit {
     }
   }
 
-  // ✅ ADICIONAR: Método para cadastrar novo pet
+  
   private cadastrarPet(): void {
     this.petsService.criarPet(this.petForm.value).subscribe({
       next: (petCriado: any) => {
@@ -211,7 +211,7 @@ export class PetFormComponent implements OnInit {
     });
   }
 
-  // ✅ ADICIONAR: Método para atualizar pet existente
+  
   private atualizarPet(): void {
     if (!this.petId) return;
 

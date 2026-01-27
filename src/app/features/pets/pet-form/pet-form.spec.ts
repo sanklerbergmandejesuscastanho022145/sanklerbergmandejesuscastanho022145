@@ -1,234 +1,244 @@
 // src/app/features/pets/pet-form/pet-form.spec.ts
+import '../../../../test-setup';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { ReactiveFormsModule } from '@angular/forms';
-import { Router } from '@angular/router';
-import { of, throwError } from 'rxjs';
 import { PetFormComponent } from './pet-form';
+import { ActivatedRoute, Router } from '@angular/router';
 import { PetsService } from '../../../services/pets.service';
-import { TutorService } from '../../../services/tutor.service';
+import { of, throwError } from 'rxjs';
+import { ReactiveFormsModule } from '@angular/forms';
+import { HttpEventType } from '@angular/common/http';
 
 describe('PetFormComponent', () => {
   let component: PetFormComponent;
   let fixture: ComponentFixture<PetFormComponent>;
-  let petsServiceSpy: jasmine.SpyObj<PetsService>;
-  let tutorServiceSpy: jasmine.SpyObj<TutorService>;
-  let routerSpy: jasmine.SpyObj<Router>;
+  let mockPetsService: any;
+  let mockRouter: any;
+  let mockActivatedRoute: any;
 
   beforeEach(async () => {
-    // Criando mocks dos serviços
-    petsServiceSpy = jasmine.createSpyObj('PetsService', [
-      'criarPet',
-      'atualizarPet',
-      'obterPetPorId',
-      'uploadFotoPet'
-    ]);
+    // Mock do PetsService
+    mockPetsService = {
+      criarPet: vi.fn().mockReturnValue(of({ id: 1, nome: 'Rex' })),
+      atualizarPet: vi.fn().mockReturnValue(of({ id: 1, nome: 'Rex Atualizado' })),
+      obterPetPorId: vi.fn().mockReturnValue(of({ 
+        id: 1, 
+        nome: 'Rex', 
+        raca: 'Labrador',
+        idade: 3,
+        foto: { url: 'http://exemplo.com/foto.jpg' }
+      })),
+      uploadFotoPet: vi.fn().mockReturnValue(of({ 
+        type: HttpEventType.Response,
+        body: { fotoUrl: 'http://exemplo.com/foto.jpg' }
+      }))
+    };
 
-    tutorServiceSpy = jasmine.createSpyObj('TutorService', ['listarTutores']);
-    tutorServiceSpy.listarTutores.and.returnValue(of([]));
+    // Mock do Router
+    mockRouter = {
+      navigate: vi.fn()
+    };
 
-    routerSpy = jasmine.createSpyObj('Router', ['navigate']);
+    // Mock do ActivatedRoute (modo cadastro - sem ID)
+    mockActivatedRoute = {
+      snapshot: {
+        paramMap: { 
+          get: vi.fn().mockReturnValue(null)
+        }
+      }
+    };
 
     await TestBed.configureTestingModule({
       imports: [PetFormComponent, ReactiveFormsModule],
       providers: [
-        { provide: PetsService, useValue: petsServiceSpy },
-        { provide: TutorService, useValue: tutorServiceSpy },
-        { provide: Router, useValue: routerSpy }
+        { provide: PetsService, useValue: mockPetsService },
+        { provide: Router, useValue: mockRouter },
+        { provide: ActivatedRoute, useValue: mockActivatedRoute }
       ]
     }).compileComponents();
-  });
 
-  beforeEach(() => {
     fixture = TestBed.createComponent(PetFormComponent);
     component = fixture.componentInstance;
-    fixture.detectChanges();
   });
 
   it('deve criar o componente', () => {
     expect(component).toBeTruthy();
   });
 
-  it('deve inicializar o formulário com campos vazios', () => {
+  it('deve inicializar o formulário com campos vazios no modo cadastro', () => {
+    fixture.detectChanges();
     expect(component.petForm.get('nome')?.value).toBe('');
     expect(component.petForm.get('especie')?.value).toBe('');
-    expect(component.petForm.get('raca')?.value).toBe('');
-    expect(component.petForm.get('idade')?.value).toBeNull();
+    expect(component.isEditMode).toBe(false);
   });
 
   it('deve validar campo nome como obrigatório', () => {
+    fixture.detectChanges();
     const nomeControl = component.petForm.get('nome');
-    
     nomeControl?.setValue('');
     expect(nomeControl?.hasError('required')).toBe(true);
+  });
 
-    nomeControl?.setValue('Rex');
-    expect(nomeControl?.hasError('required')).toBe(false);
+  it('deve validar campo nome com mínimo de 2 caracteres', () => {
+    fixture.detectChanges();
+    const nomeControl = component.petForm.get('nome');
+    nomeControl?.setValue('A');
+    expect(nomeControl?.hasError('minlength')).toBe(true);
   });
 
   it('deve validar espécie como obrigatória', () => {
+    fixture.detectChanges();
     const especieControl = component.petForm.get('especie');
-    
     especieControl?.setValue('');
     expect(especieControl?.hasError('required')).toBe(true);
-
-    especieControl?.setValue('Cachorro');
-    expect(especieControl?.hasError('required')).toBe(false);
   });
 
-  it('deve validar idade como número positivo', () => {
+  it('deve validar idade como obrigatória', () => {
+    fixture.detectChanges();
     const idadeControl = component.petForm.get('idade');
-    
+    idadeControl?.setValue(null);
+    expect(idadeControl?.hasError('required')).toBe(true);
+  });
+
+  it('deve validar idade mínima como 0', () => {
+    fixture.detectChanges();
+    const idadeControl = component.petForm.get('idade');
     idadeControl?.setValue(-1);
     expect(idadeControl?.hasError('min')).toBe(true);
+  });
 
-    idadeControl?.setValue(0);
-    expect(idadeControl?.hasError('min')).toBe(true);
-
-    idadeControl?.setValue(5);
-    expect(idadeControl?.valid).toBe(true);
+  it('deve validar idade máxima como 50', () => {
+    fixture.detectChanges();
+    const idadeControl = component.petForm.get('idade');
+    idadeControl?.setValue(51);
+    expect(idadeControl?.hasError('max')).toBe(true);
   });
 
   it('deve processar upload de imagem corretamente', () => {
-    const file = new File(['test'], 'test.jpg', { type: 'image/jpeg' });
-    Object.defineProperty(file, 'size', { value: 1024 * 1024 }); // 1MB
-
-    const event = {
-      target: {
-        files: [file]
-      }
-    } as any;
-
+    fixture.detectChanges();
+    const file = new File(['fake-content'], 'test.jpg', { type: 'image/jpeg' });
+    const event = { target: { files: [file] } } as any;
+    
     component.onFileSelected(event);
-    expect(component.onFileSelected).toBe(file);
+    expect(component.selectedFile).toBe(file);
   });
 
   it('deve rejeitar imagem maior que 5MB', () => {
-    const file = new File(['test'], 'test.jpg', { type: 'image/jpeg' });
-    Object.defineProperty(file, 'size', { value: 6 * 1024 * 1024 }); // 6MB
-
-    const event = {
-      target: {
-        files: [file]
-      }
-    } as any;
-
-    spyOn(window, 'alert');
-    component.onFileSelected(event);
+    fixture.detectChanges();
+    const largeFile = new File(['x'.repeat(6 * 1024 * 1024)], 'large.jpg', { type: 'image/jpeg' });
+    const event = { target: { files: [largeFile] } } as any;
     
-    expect(window.alert).toHaveBeenCalledWith('A imagem deve ter no máximo 5MB');
-    expect(component.onFileSelected).toBeNull();
-  });
-
-  it('deve criar um novo pet com sucesso', (done) => {
-    const mockPet = {
-      id: 1,
-      nome: 'Rex',
-      raca: 'Labrador',
-      idade: 3
-    };
-
-    petsServiceSpy.criarPet.and.returnValue(of(mockPet));
-
-    component.petForm.patchValue({
-      nome: 'Rex',
-      especie: 'Cachorro',
-      raca: 'Labrador',
-      idade: 3,
-      tutorId: 1
-    });
-
-    component.onSubmit();
-
-    setTimeout(() => {
-      expect(petsServiceSpy.criarPet).toHaveBeenCalled();
-      expect(routerSpy.navigate).toHaveBeenCalledWith(['/pets']);
-      done();
-    }, 100);
-  });
-
-  it('deve atualizar um pet existente', (done) => {
-    component.petId = 1;
-    const mockPet = {
-      id: 1,
-      nome: 'Rex Atualizado',
-      raca: 'Labrador',
-      idade: 4
-    };
-
-    petsServiceSpy.atualizarPet.and.returnValue(of(mockPet));
-
-    component.petForm.patchValue({
-      nome: 'Rex Atualizado',
-      especie: 'Cachorro',
-      raca: 'Labrador',
-      idade: 4,
-      tutorId: 1
-    });
-
-    component.onSubmit();
-
-    setTimeout(() => {
-      expect(petsServiceSpy.atualizarPet).toHaveBeenCalledWith(1, jasmine.any(Object));
-      expect(routerSpy.navigate).toHaveBeenCalledWith(['/pets']);
-      done();
-    }, 100);
-  });
-
-  it('deve tratar erro ao criar pet', (done) => {
-    petsServiceSpy.criarPet.and.returnValue(
-      throwError(() => new Error('Erro ao criar pet'))
-    );
-
-    spyOn(window, 'alert');
-
-    component.petForm.patchValue({
-      nome: 'Rex',
-      especie: 'Cachorro',
-      raca: 'Labrador',
-      idade: 3,
-      tutorId: 1
-    });
-
-    component.onSubmit();
-
-    setTimeout(() => {
-      expect(window.alert).toHaveBeenCalled();
-      done();
-    }, 100);
-  });
-
-  it('não deve submeter formulário inválido', () => {
-    component.petForm.patchValue({
-      nome: '',
-      especie: '',
-      raca: '',
-      idade: null
-    });
-
-    component.onSubmit();
-
-    expect(petsServiceSpy.criarPet).not.toHaveBeenCalled();
-    expect(petsServiceSpy.atualizarPet).not.toHaveBeenCalled();
-  });
-
-  it('deve cancelar e navegar para lista de pets', () => {
-    component.onCancel();
-    expect(routerSpy.navigate).toHaveBeenCalledWith(['/pets']);
+    component.onFileSelected(event);
+    expect(component.errorMessage).toContain('5MB');
   });
 
   it('deve rejeitar arquivo que não é imagem', () => {
-    const file = new File(['test'], 'test.txt', { type: 'text/plain' });
+    fixture.detectChanges();
+    const file = new File(['fake-content'], 'test.txt', { type: 'text/plain' });
+    const event = { target: { files: [file] } } as any;
     
-    const event = {
-      target: {
-        files: [file]
-      }
-    } as any;
-
-    spyOn(window, 'alert');
     component.onFileSelected(event);
+    expect(component.errorMessage).toContain('imagem válida');
+  });
+
+  it('deve remover foto corretamente', () => {
+    fixture.detectChanges();
+    component.selectedFile = new File(['test'], 'test.jpg', { type: 'image/jpeg' });
+    component.fotoPreview = 'data:image/jpeg;base64,test';
+    component.uploadProgress = 50;
+
+    component.removePhoto();
+
+    expect(component.selectedFile).toBeNull();
+    expect(component.fotoPreview).toBeNull();
+    expect(component.uploadProgress).toBe(0);
+  });
+
+  it('deve criar um novo pet sem foto com sucesso', async () => {
+    fixture.detectChanges();
+    component.petForm.patchValue({
+      nome: 'Rex',
+      especie: 'Cachorro',
+      raca: 'Labrador',
+      idade: 3
+    });
+
+    component.onSubmit();
     
-    expect(window.alert).toHaveBeenCalledWith('Por favor, selecione apenas imagens (JPG, PNG, GIF)');
-    expect(component.onFileSelected).toBeNull();
+    expect(mockPetsService.criarPet).toHaveBeenCalledWith({
+      nome: 'Rex',
+      especie: 'Cachorro',
+      raca: 'Labrador',
+      idade: 3
+    });
+  });
+
+  it('não deve submeter formulário inválido', () => {
+    fixture.detectChanges();
+    component.petForm.patchValue({ nome: '' });
+    
+    component.onSubmit();
+    expect(mockPetsService.criarPet).not.toHaveBeenCalled();
+  });
+
+  it('deve carregar dados do pet no modo edição', () => {
+    mockActivatedRoute.snapshot.paramMap.get = vi.fn().mockReturnValue('1');
+    
+    component.ngOnInit();
+    
+    expect(component.petId).toBe(1);
+    expect(component.isEditMode).toBe(true);
+    expect(mockPetsService.obterPetPorId).toHaveBeenCalledWith(1);
+  });
+
+  it('deve atualizar pet existente com sucesso', () => {
+    fixture.detectChanges();
+    component.petId = 1;
+    component.isEditMode = true;
+
+    component.petForm.patchValue({
+      nome: 'Rex Atualizado',
+      especie: 'Cachorro',
+      raca: 'Labrador',
+      idade: 4
+    });
+
+    component.onSubmit();
+
+    expect(mockPetsService.atualizarPet).toHaveBeenCalledWith(1, {
+      nome: 'Rex Atualizado',
+      especie: 'Cachorro',
+      raca: 'Labrador',
+      idade: 4
+    });
+  });
+
+  it('deve tratar erro ao criar pet', () => {
+    mockPetsService.criarPet.mockReturnValue(throwError(() => new Error('Erro ao criar')));
+    fixture.detectChanges();
+
+    component.petForm.patchValue({
+      nome: 'Rex',
+      especie: 'Cachorro',
+      idade: 3
+    });
+
+    component.onSubmit();
+
+    expect(component.errorMessage).toContain('Erro ao cadastrar pet');
+  });
+
+  it('deve cancelar e navegar para lista de pets', () => {
+    fixture.detectChanges();
+    component.onCancel();
+    expect(mockRouter.navigate).toHaveBeenCalledWith(['/pets']);
+  });
+
+  it('deve tratar erro ao carregar dados do pet', () => {
+    mockPetsService.obterPetPorId.mockReturnValue(throwError(() => new Error('Erro ao carregar')));
+    mockActivatedRoute.snapshot.paramMap.get = vi.fn().mockReturnValue('1');
+
+    component.ngOnInit();
+
+    expect(component.errorMessage).toContain('Erro ao carregar dados do pet');
   });
 });

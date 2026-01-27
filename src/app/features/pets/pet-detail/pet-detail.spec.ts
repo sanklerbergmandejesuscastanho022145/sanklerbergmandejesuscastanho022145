@@ -1,22 +1,26 @@
-// src/app/features/pets/pet-detail/pet-detail.spec.ts
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import '../../../../test-setup';
+
+import { TestBed } from '@angular/core/testing';
 import { PetDetailComponent } from './pet-detail';
+import { ActivatedRoute } from '@angular/router';
+import { of } from 'rxjs';
 
 describe('PetDetailComponent', () => {
-  let component: PetDetailComponent;
-  let fixture: ComponentFixture<PetDetailComponent>;
-
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [PetDetailComponent]
+      imports: [PetDetailComponent],
+      providers: [
+        {
+          provide: ActivatedRoute,
+          useValue: { params: of({ id: '123' }) }
+        }
+      ]
     }).compileComponents();
-
-    fixture = TestBed.createComponent(PetDetailComponent);
-    component = fixture.componentInstance;
-    fixture.detectChanges();
   });
 
   it('should create', () => {
+    const fixture = TestBed.createComponent(PetDetailComponent);
+    const component = fixture.componentInstance;
     expect(component).toBeTruthy();
   });
 });

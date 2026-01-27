@@ -1,3 +1,5 @@
+import '../../test-setup';
+
 // src/app/services/auth.service.spec.ts
 import { TestBed } from '@angular/core/testing';
 import { AuthService } from './auth.service';

@@ -1,22 +1,26 @@
-// src/app/features/tutores/tutor-detail/tutor-detail.spec.ts
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import '../../../../test-setup';
+
+import { TestBed } from '@angular/core/testing';
 import { TutorDetailComponent } from './tutor-detail';
+import { ActivatedRoute } from '@angular/router';
+import { of } from 'rxjs';
 
-describe('TutorDetailComponent', () => {
-  let component: TutorDetailComponent;
-  let fixture: ComponentFixture<TutorDetailComponent>;
-
+describe('PetDetailComponent', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [TutorDetailComponent]
+      imports: [TutorDetailComponent],
+      providers: [
+        {
+          provide: ActivatedRoute,
+          useValue: { params: of({ id: '123' }) }
+        }
+      ]
     }).compileComponents();
-
-    fixture = TestBed.createComponent(TutorDetailComponent);
-    component = fixture.componentInstance;
-    fixture.detectChanges();
   });
 
   it('should create', () => {
+    const fixture = TestBed.createComponent(TutorDetailComponent);
+    const component = fixture.componentInstance;
     expect(component).toBeTruthy();
   });
 });

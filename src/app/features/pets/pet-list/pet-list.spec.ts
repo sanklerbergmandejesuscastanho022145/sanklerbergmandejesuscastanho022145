@@ -1,3 +1,5 @@
+import '../../../../test-setup';
+
 // src/app/features/pets/pet-list/pet-list.spec.ts
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { PetsListComponent } from './pet-list';

@@ -1,3 +1,5 @@
+import '../../../../test-setup';
+
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { Card } from './card';

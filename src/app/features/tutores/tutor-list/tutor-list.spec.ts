@@ -1,3 +1,5 @@
+import '../../../../test-setup';
+
 // src/app/features/tutores/tutor-list/tutor-list.spec.ts
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { TutorListComponent } from './tutor-list';

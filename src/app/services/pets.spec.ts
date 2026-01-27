@@ -1,3 +1,5 @@
+import '../../test-setup';
+
 // src/app/services/pets.spec.ts
 import { TestBed } from '@angular/core/testing';
 import { PetsService } from './pets.service';
