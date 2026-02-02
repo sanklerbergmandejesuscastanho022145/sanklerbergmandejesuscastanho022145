@@ -24,7 +24,8 @@ npm install
 ng serve --open
 
 ## Para testes unitarios
-npm install --save-dev @types/jasmine @types/node
+npm install zone.js --legacy-peer-deps
+npm install -D @analogjs/vite-plugin-angular --legacy-peer-deps
 
 ### PENDENTES DE SEGUIR PROJETO**
 
