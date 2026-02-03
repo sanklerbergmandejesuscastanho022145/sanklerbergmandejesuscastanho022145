@@ -5,406 +5,427 @@ import { PetsListComponent } from './pet-list';
 import { PetsService } from '../../../services/pets.service';
 import { AuthService } from '../../../services/auth.service';
 import { Router } from '@angular/router';
-import { of, throwError } from 'rxjs';
+import { of, throwError, Observable } from 'rxjs';
 import { HttpErrorResponse } from '@angular/common/http';
 import { vi } from 'vitest';
 import { ChangeDetectorRef } from '@angular/core';
 
 describe('PetListComponent', () => {
-  let component: PetsListComponent;
-  let fixture: ComponentFixture<PetsListComponent>;
-  let petsService: any;
-  let authService: any;
-  let router: any;
-  let cdr: any;
+ let component: PetsListComponent;
+ let fixture: ComponentFixture<PetsListComponent>;
+ let petsService: any;
+ let authService: any;
+ let router: any;
 
-  const mockPets = [
-    {
-      id: 1,
-      nome: 'Rex',
-      especie: 'Cachorro',
-      raca: 'Labrador',
-      idade: 3,
-      foto: {
-        id: 1,
-        nome: 'rex-foto.jpg',
-        url: 'https://example.com/rex-foto.jpg',
-        contentType: 'image/jpeg'
-      }
-    },
-    {
-      id: 2,
-      nome: 'Miau',
-      especie: 'Gato',
-      raca: 'Siamês',
-      idade: 2,
-      foto: null
-    }
-  ];
+ const mockPets = [
+   {
+     id: 1,
+     nome: 'Rex',
+     especie: 'Cachorro',
+     raca: 'Labrador',
+     idade: 3,
+     foto: {
+       id: 1,
+       nome: 'rex-foto.jpg',
+       url: 'https://example.com/rex-foto.jpg',
+       contentType: 'image/jpeg'
+     }
+   },
+   {
+     id: 2,
+     nome: 'Miau',
+     especie: 'Gato',
+     raca: 'Siamês',
+     idade: 2,
+     foto: null
+   }
+ ];
 
-  beforeEach(async () => {
-    petsService = {
-      listarPets: vi.fn(),
-      deletarPet: vi.fn()
-    };
+ beforeEach(async () => {
+   petsService = {
+     listarPets: vi.fn(),
+     deletarPet: vi.fn()
+   };
 
-    authService = {
-      logout: vi.fn()
-    };
+   authService = {
+     logout: vi.fn()
+   };
 
-    router = {
-      navigate: vi.fn()
-    };
+   router = {
+     navigate: vi.fn()
+   };
 
-    cdr = {
-      detectChanges: vi.fn()
-    };
+   await TestBed.configureTestingModule({
+     imports: [PetsListComponent],
+     providers: [
+       { provide: PetsService, useValue: petsService },
+       { provide: AuthService, useValue: authService },
+       { provide: Router, useValue: router }
+     ]
+   }).compileComponents();
 
-    await TestBed.configureTestingModule({
-      imports: [PetsListComponent],
-      providers: [
-        { provide: PetsService, useValue: petsService },
-        { provide: AuthService, useValue: authService },
-        { provide: Router, useValue: router },
-        { provide: ChangeDetectorRef, useValue: cdr }
-      ]
-    }).compileComponents();
+   fixture = TestBed.createComponent(PetsListComponent);
+   component = fixture.componentInstance;
+ });
 
-    fixture = TestBed.createComponent(PetsListComponent);
-    component = fixture.componentInstance;
-  });
+ it('should create', () => {
+   expect(component).toBeTruthy();
+ });
 
-  it('should create', () => {
-    expect(component).toBeTruthy();
-  });
+ describe('loading behavior', () => {
+   it('should set loading to true when starting to load pets', async () => {
+     let resolveObservable: any;
+     const delayedObservable = new Observable(subscriber => {
+       resolveObservable = () => {
+         subscriber.next(mockPets);
+         subscriber.complete();
+       };
+     });
+     
+     petsService.listarPets.mockReturnValue(delayedObservable);
+     
+     component.loading = false;
+     component.carregarPets();
+     
+     await new Promise(resolve => setTimeout(resolve, 0));
+     
+     expect(component.loading).toBe(true);
+     
+     resolveObservable();
+   });
 
-  describe('loading behavior', () => {
-    it('should set loading to true when starting to load pets', () => {
-      petsService.listarPets.mockReturnValue(of(mockPets));
-      
-      component.loading = false;
-      component.carregarPets();
-      
-      expect(component.loading).toBe(true);
-    });
+   it('should set loading to false after successfully loading pets', async () => {
+     petsService.listarPets.mockReturnValue(of(mockPets));
+     
+     component.carregarPets();
+     
+     await vi.waitFor(() => {
+       expect(component.loading).toBe(false);
+       expect(component.pets.length).toBe(2);
+       expect(component.petsFiltrados.length).toBe(2);
+     }, { timeout: 5000 });
+   });
 
-    it('should set loading to false after successfully loading pets', async () => {
-      petsService.listarPets.mockReturnValue(of(mockPets));
-      
-      component.carregarPets();
-      
-      await new Promise(resolve => setTimeout(resolve, 100));
-      
-      expect(component.loading).toBe(false);
-      expect(component.pets.length).toBe(2);
-      expect(component.petsFiltrados.length).toBe(2);
-    });
+   it('should set loading to false after error loading pets', async () => {
+     const errorResponse = new HttpErrorResponse({
+       error: 'Error loading pets',
+       status: 500,
+       statusText: 'Internal Server Error'
+     });
+     
+     petsService.listarPets.mockReturnValue(throwError(() => errorResponse));
+     
+     component.carregarPets();
+     
+     await vi.waitFor(() => {
+       expect(component.loading).toBe(false);
+       expect(component.pets.length).toBe(0);
+       expect(component.petsFiltrados.length).toBe(0);
+     }, { timeout: 5000 });
+   });
 
-    it('should set loading to false after error loading pets', async () => {
-      const errorResponse = new HttpErrorResponse({
-        error: 'Error loading pets',
-        status: 500,
-        statusText: 'Internal Server Error'
-      });
-      
-      petsService.listarPets.mockReturnValue(throwError(() => errorResponse));
-      
-      component.carregarPets();
-      
-      await new Promise(resolve => setTimeout(resolve, 100));
-      
-      expect(component.loading).toBe(false);
-      expect(component.pets.length).toBe(0);
-      expect(component.petsFiltrados.length).toBe(0);
-    });
+   it('should clear pets and petsFiltrados when starting to load', async () => {
+     component.pets = [mockPets[0]];
+     component.petsFiltrados = [mockPets[0]];
+     
+     let resolveObservable: any;
+     const delayedObservable = new Observable(subscriber => {
+       resolveObservable = () => {
+         subscriber.next(mockPets);
+         subscriber.complete();
+       };
+     });
+     
+     petsService.listarPets.mockReturnValue(delayedObservable);
+     
+     component.carregarPets();
+     
+     await new Promise(resolve => setTimeout(resolve, 0));
+     
+     expect(component.pets).toEqual([]);
+     expect(component.petsFiltrados).toEqual([]);
+     
+     resolveObservable();
+   });
 
-    it('should clear pets and petsFiltrados when starting to load', () => {
-      petsService.listarPets.mockReturnValue(of(mockPets));
-      
-      component.pets = [mockPets[0]];
-      component.petsFiltrados = [mockPets[0]];
-      
-      component.carregarPets();
-      
-      expect(component.pets).toEqual([]);
-      expect(component.petsFiltrados).toEqual([]);
-    });
+   it('should call detectChanges after loading pets', async () => {
+     petsService.listarPets.mockReturnValue(of(mockPets));
+     
+     const realCdr = (component as any).cdr;
+     vi.spyOn(realCdr, 'detectChanges');
+     
+     component.carregarPets();
+     
+     await new Promise(resolve => setTimeout(resolve, 100));
+     
+     expect(realCdr.detectChanges).toHaveBeenCalled();
+   });
+ });
 
-    it('should call detectChanges after loading pets', async () => {
-      petsService.listarPets.mockReturnValue(of(mockPets));
-      
-      component.carregarPets();
-      
-      await new Promise(resolve => setTimeout(resolve, 100));
-      
-      expect(cdr.detectChanges).toHaveBeenCalled();
-    });
-  });
+ describe('API error handling', () => {
+   it('should handle 404 error gracefully', async () => {
+     const error404 = new HttpErrorResponse({
+       error: 'Not Found',
+       status: 404,
+       statusText: 'Not Found'
+     });
+     
+     petsService.listarPets.mockReturnValue(throwError(() => error404));
+     
+     component.carregarPets();
+     
+     await vi.waitFor(() => {
+       expect(component.loading).toBe(false);
+       expect(component.pets).toEqual([]);
+       expect(component.errorMessage).toBe('Endpoint não encontrado. Verifique a URL da API.');
+     }, { timeout: 5000 });
+   });
 
-  describe('API error handling', () => {
-    it('should handle 404 error gracefully', async () => {
-      const error404 = new HttpErrorResponse({
-        error: 'Not Found',
-        status: 404,
-        statusText: 'Not Found'
-      });
-      
-      petsService.listarPets.mockReturnValue(throwError(() => error404));
-      
-      component.carregarPets();
-      
-      await new Promise(resolve => setTimeout(resolve, 100));
-      
-      expect(component.loading).toBe(false);
-      expect(component.pets).toEqual([]);
-      expect(component.errorMessage).toBe('Endpoint não encontrado. Verifique a URL da API.');
-    });
+   it('should handle 500 internal server error', async () => {
+     const error500 = new HttpErrorResponse({
+       error: 'Internal Server Error',
+       status: 500,
+       statusText: 'Internal Server Error'
+     });
+     
+     petsService.listarPets.mockReturnValue(throwError(() => error500));
+     
+     component.carregarPets();
+     
+     await vi.waitFor(() => {
+       expect(component.loading).toBe(false);
+       expect(component.pets).toEqual([]);
+       expect(component.errorMessage).toBe('Erro ao carregar pets');
+     }, { timeout: 5000 });
+   });
 
-    it('should handle 500 internal server error', async () => {
-      const error500 = new HttpErrorResponse({
-        error: 'Internal Server Error',
-        status: 500,
-        statusText: 'Internal Server Error'
-      });
-      
-      petsService.listarPets.mockReturnValue(throwError(() => error500));
-      
-      component.carregarPets();
-      
-      await new Promise(resolve => setTimeout(resolve, 100));
-      
-      expect(component.loading).toBe(false);
-      expect(component.pets).toEqual([]);
-      expect(component.errorMessage).toBe('Erro ao carregar pets');
-    });
+   it('should handle 401 unauthorized error and logout', async () => {
+     const errorResponse = new HttpErrorResponse({
+       error: 'Unauthorized',
+       status: 401,
+       statusText: 'Unauthorized'
+     });
 
-    it('should handle 401 unauthorized error and logout', async () => {
-      vi.useFakeTimers();
-      
-      const error401 = new HttpErrorResponse({
-        error: 'Unauthorized',
-        status: 401,
-        statusText: 'Unauthorized'
-      });
-      
-      petsService.listarPets.mockReturnValue(throwError(() => error401));
-      
-      component.carregarPets();
-      
-      await new Promise(resolve => setTimeout(resolve, 100));
-      
-      expect(component.loading).toBe(false);
-      expect(component.errorMessage).toBe('Sessão expirada. Faça login novamente.');
-      
-      vi.advanceTimersByTime(2000);
-      
-      expect(authService.logout).toHaveBeenCalled();
-      
-      vi.useRealTimers();
-    });
+     petsService.listarPets.mockReturnValue(throwError(() => errorResponse));
+     
+     component.carregarPets();
+     
+     await vi.waitFor(() => {
+       expect(component.loading).toBe(false);
+       expect(component.errorMessage).toBe('Sessão expirada. Faça login novamente.');
+     }, { timeout: 10000 });
+     
+     await new Promise(resolve => setTimeout(resolve, 2100));
+     
+     expect(authService.logout).toHaveBeenCalled();
+   }, 15000);
 
-    it('should handle network error (status 0)', async () => {
-      const networkError = new HttpErrorResponse({
-        error: new ErrorEvent('Network error', {
-          message: 'Network connection failed'
-        }),
-        status: 0,
-        statusText: 'Unknown Error'
-      });
-      
-      petsService.listarPets.mockReturnValue(throwError(() => networkError));
-      
-      component.carregarPets();
-      
-      await new Promise(resolve => setTimeout(resolve, 100));
-      
-      expect(component.loading).toBe(false);
-      expect(component.pets).toEqual([]);
-      expect(component.errorMessage).toBe('Erro de conexão. Verifique sua internet ou se a API está disponível.');
-    });
+   it('should handle network error (status 0)', async () => {
+     const networkError = new HttpErrorResponse({
+       error: new ErrorEvent('Network error', {
+         message: 'Network connection failed'
+       }),
+       status: 0,
+       statusText: 'Unknown Error'
+     });
+     
+     petsService.listarPets.mockReturnValue(throwError(() => networkError));
+     
+     component.carregarPets();
+     
+     await vi.waitFor(() => {
+       expect(component.loading).toBe(false);
+       expect(component.pets).toEqual([]);
+       expect(component.errorMessage).toBe('Erro de conexão. Verifique sua internet ou se a API está disponível.');
+     }, { timeout: 5000 });
+   });
 
-    it('should handle empty response from API', async () => {
-      petsService.listarPets.mockReturnValue(of([]));
-      
-      component.carregarPets();
-      
-      await new Promise(resolve => setTimeout(resolve, 100));
-      
-      expect(component.loading).toBe(false);
-      expect(component.pets).toEqual([]);
-      expect(component.petsFiltrados).toEqual([]);
-      expect(component.errorMessage).toBe('');
-    });
+   it('should handle empty response from API', async () => {
+     petsService.listarPets.mockReturnValue(of([]));
+     
+     component.carregarPets();
+     
+     await vi.waitFor(() => {
+       expect(component.loading).toBe(false);
+       expect(component.pets).toEqual([]);
+       expect(component.petsFiltrados).toEqual([]);
+       expect(component.errorMessage).toBe('');
+     }, { timeout: 5000 });
+   });
 
-    it('should call detectChanges after error', async () => {
-      const error = new HttpErrorResponse({
-        error: 'Error',
-        status: 500,
-        statusText: 'Internal Server Error'
-      });
-      
-      petsService.listarPets.mockReturnValue(throwError(() => error));
-      
-      component.carregarPets();
-      
-      await new Promise(resolve => setTimeout(resolve, 100));
-      
-      expect(cdr.detectChanges).toHaveBeenCalled();
-    });
-  });
+   it('should call detectChanges after error', async () => {
+     const error = new HttpErrorResponse({
+       error: 'Error',
+       status: 500,
+       statusText: 'Internal Server Error'
+     });
+     
+     petsService.listarPets.mockReturnValue(throwError(() => error));
+     
+     const realCdr = (component as any).cdr;
+     vi.spyOn(realCdr, 'detectChanges');
+     
+     component.carregarPets();
+     
+     await new Promise(resolve => setTimeout(resolve, 100));
+     
+     expect(realCdr.detectChanges).toHaveBeenCalled();
+   });
+ });
 
-  describe('filtro/busca functionality', () => {
-    beforeEach(() => {
-      component.pets = [...mockPets];
-      component.petsFiltrados = [...mockPets];
-    });
+ describe('filtro/busca functionality', () => {
+   beforeEach(() => {
+     component.pets = [...mockPets];
+     component.petsFiltrados = [...mockPets];
+   });
 
-    it('should filter pets by name', () => {
-      component.termoBusca = 'rex';
-      component.aplicarFiltro();
-      
-      expect(component.petsFiltrados.length).toBe(1);
-      expect(component.petsFiltrados[0].nome).toBe('Rex');
-    });
+   it('should filter pets by name', () => {
+     component.termoBusca = 'rex';
+     component.aplicarFiltro();
+     
+     expect(component.petsFiltrados.length).toBe(1);
+     expect(component.petsFiltrados[0].nome).toBe('Rex');
+   });
 
-    it('should filter pets case-insensitive', () => {
-      component.termoBusca = 'REX';
-      component.aplicarFiltro();
-      
-      expect(component.petsFiltrados.length).toBe(1);
-      expect(component.petsFiltrados[0].nome).toBe('Rex');
-    });
+   it('should filter pets case-insensitive', () => {
+     component.termoBusca = 'REX';
+     component.aplicarFiltro();
+     
+     expect(component.petsFiltrados.length).toBe(1);
+     expect(component.petsFiltrados[0].nome).toBe('Rex');
+   });
 
-    it('should show all pets when search term is empty', () => {
-      component.termoBusca = '';
-      component.aplicarFiltro();
-      
-      expect(component.petsFiltrados.length).toBe(2);
-    });
+   it('should show all pets when search term is empty', () => {
+     component.termoBusca = '';
+     component.aplicarFiltro();
+     
+     expect(component.petsFiltrados.length).toBe(2);
+   });
 
-    it('should show all pets when search term is only spaces', () => {
-      component.termoBusca = '   ';
-      component.aplicarFiltro();
-      
-      expect(component.petsFiltrados.length).toBe(2);
-    });
+   it('should show all pets when search term is only spaces', () => {
+     component.termoBusca = '   ';
+     component.aplicarFiltro();
+     
+     expect(component.petsFiltrados.length).toBe(2);
+   });
 
-    it('should return empty array when no pets match search', () => {
-      component.termoBusca = 'inexistente';
-      component.aplicarFiltro();
-      
-      expect(component.petsFiltrados.length).toBe(0);
-    });
+   it('should return empty array when no pets match search', () => {
+     component.termoBusca = 'inexistente';
+     component.aplicarFiltro();
+     
+     expect(component.petsFiltrados.length).toBe(0);
+   });
 
-    it('should clear search and show all pets', () => {
-      component.termoBusca = 'rex';
-      component.aplicarFiltro();
-      expect(component.petsFiltrados.length).toBe(1);
-      
-      component.limparBusca();
-      
-      expect(component.termoBusca).toBe('');
-      expect(component.petsFiltrados.length).toBe(2);
-    });
+   it('should clear search and show all pets', () => {
+     component.termoBusca = 'rex';
+     component.aplicarFiltro();
+     expect(component.petsFiltrados.length).toBe(1);
+     
+     component.limparBusca();
+     
+     expect(component.termoBusca).toBe('');
+     expect(component.petsFiltrados.length).toBe(2);
+   });
 
-    it('should filter by partial name match', () => {
-      component.termoBusca = 'ia';
-      component.aplicarFiltro();
-      
-      expect(component.petsFiltrados.length).toBe(1);
-      expect(component.petsFiltrados[0].nome).toBe('Miau');
-    });
-  });
+   it('should filter by partial name match', () => {
+     component.termoBusca = 'ia';
+     component.aplicarFiltro();
+     
+     expect(component.petsFiltrados.length).toBe(1);
+     expect(component.petsFiltrados[0].nome).toBe('Miau');
+   });
+ });
 
-  describe('navigation', () => {
-    it('should navigate to pet details', () => {
-      component.verDetalhes(1);
-      
-      expect(router.navigate).toHaveBeenCalledWith(['/pets', '1']);
-    });
+ describe('navigation', () => {
+   it('should navigate to pet details', () => {
+     component.verDetalhes(1);
+     
+     expect(router.navigate).toHaveBeenCalledWith(['/pets', '1']);
+   });
 
-    it('should not navigate if id is invalid', () => {
-      component.verDetalhes(0);
-      
-      expect(router.navigate).not.toHaveBeenCalled();
-    });
+   it('should not navigate if id is invalid', () => {
+     component.verDetalhes(0);
+     
+     expect(router.navigate).not.toHaveBeenCalled();
+   });
 
-    it('should navigate to edit pet', () => {
-      component.editarPet(1);
-      
-      expect(router.navigate).toHaveBeenCalledWith(['/pets', 1, 'editar']);
-    });
+   it('should navigate to edit pet', () => {
+     component.editarPet(1);
+     
+     expect(router.navigate).toHaveBeenCalledWith(['/pets', 1, 'editar']);
+   });
 
-    it('should navigate to new pet form', () => {
-      component.novoPet();
-      
-      expect(router.navigate).toHaveBeenCalledWith(['/pets/novo']);
-    });
+   it('should navigate to new pet form', () => {
+     component.novoPet();
+     
+     expect(router.navigate).toHaveBeenCalledWith(['/pets/novo']);
+   });
 
-    it('should navigate to tutores page', () => {
-      component.irParaTutores();
-      
-      expect(router.navigate).toHaveBeenCalledWith(['/tutores']);
-    });
-  });
+   it('should navigate to tutores page', () => {
+     component.irParaTutores();
+     
+     expect(router.navigate).toHaveBeenCalledWith(['/tutores']);
+   });
+ });
 
-  describe('delete functionality', () => {
-    it('should delete pet after confirmation', async () => {
-      vi.spyOn(window, 'confirm').mockReturnValue(true);
-      petsService.deletarPet.mockReturnValue(of(null));
-      petsService.listarPets.mockReturnValue(of(mockPets));
-      
-      component.deletarPet(1);
-      
-      await new Promise(resolve => setTimeout(resolve, 100));
-      
-      expect(petsService.deletarPet).toHaveBeenCalledWith(1);
-      expect(petsService.listarPets).toHaveBeenCalled();
-    });
+ describe('delete functionality', () => {
+   it('should delete pet after confirmation', async () => {
+     vi.spyOn(window, 'confirm').mockReturnValue(true);
+     petsService.deletarPet.mockReturnValue(of(null));
+     petsService.listarPets.mockReturnValue(of(mockPets));
+     
+     component.deletarPet(1);
+     
+     await vi.waitFor(() => {
+       expect(petsService.deletarPet).toHaveBeenCalledWith(1);
+       expect(petsService.listarPets).toHaveBeenCalled();
+     }, { timeout: 5000 });
+   });
 
-    it('should not delete pet if user cancels', () => {
-      vi.spyOn(window, 'confirm').mockReturnValue(false);
-      
-      component.deletarPet(1);
-      
-      expect(petsService.deletarPet).not.toHaveBeenCalled();
-    });
+   it('should not delete pet if user cancels', () => {
+     vi.spyOn(window, 'confirm').mockReturnValue(false);
+     
+     component.deletarPet(1);
+     
+     expect(petsService.deletarPet).not.toHaveBeenCalled();
+   });
 
-    it('should show alert on delete error', async () => {
-      vi.spyOn(window, 'confirm').mockReturnValue(true);
-      vi.spyOn(window, 'alert').mockImplementation(() => {});
-      
-      const error = new HttpErrorResponse({
-        error: 'Error deleting pet',
-        status: 500,
-        statusText: 'Internal Server Error'
-      });
-      
-      petsService.deletarPet.mockReturnValue(throwError(() => error));
-      
-      component.deletarPet(1);
-      
-      await new Promise(resolve => setTimeout(resolve, 100));
-      
-      expect(window.alert).toHaveBeenCalledWith('Erro ao deletar pet');
-    });
-  });
+   it('should show alert on delete error', async () => {
+     vi.spyOn(window, 'confirm').mockReturnValue(true);
+     vi.spyOn(window, 'alert').mockImplementation(() => {});
+     
+     const error = new HttpErrorResponse({
+       error: 'Error deleting pet',
+       status: 500,
+       statusText: 'Internal Server Error'
+     });
+     
+     petsService.deletarPet.mockReturnValue(throwError(() => error));
+     petsService.listarPets.mockReturnValue(of(mockPets));
+     
+     component.deletarPet(1);
+     
+     await new Promise(resolve => setTimeout(resolve, 100));
+     
+     expect(window.alert).toHaveBeenCalledWith('Erro ao deletar pet');
+   });
+ });
 
-  describe('logout', () => {
-    it('should call authService logout', () => {
-      component.logout();
-      
-      expect(authService.logout).toHaveBeenCalled();
-    });
-  });
+ describe('logout', () => {
+   it('should call authService logout', () => {
+     component.logout();
+     
+     expect(authService.logout).toHaveBeenCalled();
+   });
+ });
 
-  describe('ngOnInit', () => {
-    it('should load pets on init', () => {
-      petsService.listarPets.mockReturnValue(of(mockPets));
-      
-      component.ngOnInit();
-      
-      expect(petsService.listarPets).toHaveBeenCalled();
-    });
-  });
+ describe('ngOnInit', () => {
+   it('should load pets on init', () => {
+     petsService.listarPets.mockReturnValue(of(mockPets));
+     
+     component.ngOnInit();
+     
+     expect(petsService.listarPets).toHaveBeenCalled();
+   });
+ });
 });

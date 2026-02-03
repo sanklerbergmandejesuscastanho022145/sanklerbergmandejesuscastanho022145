@@ -1,7 +1,8 @@
-import '../../../test-setup';
+import '../../test-setup';
 
 import { TestBed } from '@angular/core/testing';
 import { HttpClientTestingModule, HttpTestingController } from '@angular/common/http/testing';
+import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
 import { AuthService } from './auth.service';
 import { HttpErrorResponse } from '@angular/common/http';
@@ -15,7 +16,7 @@ describe('AuthService', () => {
 
   const mockLoginResponse = {
     access_token: 'fake-jwt-token-12345',
-    refresh_token:67890'
+    refresh_token: 'fake-refresh-token-67890'
   };
 
   const mockRefreshResponse = {
@@ -54,7 +55,7 @@ describe('AuthService', () => {
   });
 
   describe('login', () => {
-    it('should authenticate user and store tokens', (done) => {
+    it('should authenticate user and store tokens', () => {
       const username = 'admin';
       const password = 'admin123';
 
@@ -63,7 +64,6 @@ describe('AuthService', () => {
           expect(response).toEqual(mockLoginResponse);
           expect(localStorage.getItem('access_token')).toBe(mockLoginResponse.access_token);
           expect(localStorage.getItem('refresh_token')).toBe(mockLoginResponse.refresh_token);
-          done();
         }
       });
 
@@ -74,19 +74,22 @@ describe('AuthService', () => {
       req.flush(mockLoginResponse);
     });
 
-    it('should update isAuthenticated$ observable on successful login', (done) => {
+    it('should update isAuthenticated$ observable on successful login', () => {
+      let isAuthResult = false;
+
       service.login('admin', 'admin123').subscribe(() => {
         service.isAuthenticated$.subscribe(isAuth => {
-          expect(isAuth).toBe(true);
-          done();
+          isAuthResult = isAuth;
         });
       });
 
       const req = httpMock.expectOne(`${API_URL}/autenticacao/login`);
       req.flush(mockLoginResponse);
+
+      expect(isAuthResult).toBe(true);
     });
 
-    it('should handle login without refresh_token', (done) => {
+    it('should handle login without refresh_token', () => {
       const responseWithoutRefresh = {
         access_token: 'fake-token-only'
       };
@@ -96,7 +99,6 @@ describe('AuthService', () => {
           expect(response).toEqual(responseWithoutRefresh);
           expect(localStorage.getItem('access_token')).toBe('fake-token-only');
           expect(localStorage.getItem('refresh_token')).toBeNull();
-          done();
         }
       });
 
@@ -104,7 +106,7 @@ describe('AuthService', () => {
       req.flush(responseWithoutRefresh);
     });
 
-    it('should handle invalid credentials (401)', (done) => {
+    it('should handle invalid credentials (401)', () => {
       service.login('wrong', 'credentials').subscribe({
         next: () => {
           throw new Error('should have failed');
@@ -113,7 +115,6 @@ describe('AuthService', () => {
           expect(error.status).toBe(401);
           expect(error.statusText).toBe('Unauthorized');
           expect(localStorage.getItem('access_token')).toBeNull();
-          done();
         }
       });
 
@@ -121,14 +122,13 @@ describe('AuthService', () => {
       req.flush('Invalid credentials', { status: 401, statusText: 'Unauthorized' });
     });
 
-    it('should handle empty username', (done) => {
+    it('should handle empty username', () => {
       service.login('', 'password').subscribe({
         next: () => {
           throw new Error('should have failed');
         },
         error: (error: HttpErrorResponse) => {
           expect(error.status).toBe(400);
-          done();
         }
       });
 
@@ -136,14 +136,13 @@ describe('AuthService', () => {
       req.flush('Username is required', { status: 400, statusText: 'Bad Request' });
     });
 
-    it('should handle empty password', (done) => {
+    it('should handle empty password', () => {
       service.login('admin', '').subscribe({
         next: () => {
           throw new Error('should have failed');
         },
         error: (error: HttpErrorResponse) => {
           expect(error.status).toBe(400);
-          done();
         }
       });
 
@@ -151,14 +150,13 @@ describe('AuthService', () => {
       req.flush('Password is required', { status: 400, statusText: 'Bad Request' });
     });
 
-    it('should handle server error during login', (done) => {
+    it('should handle server error during login', () => {
       service.login('admin', 'admin123').subscribe({
         next: () => {
           throw new Error('should have failed');
         },
         error: (error: HttpErrorResponse) => {
           expect(error.status).toBe(500);
-          done();
         }
       });
 
@@ -166,14 +164,13 @@ describe('AuthService', () => {
       req.flush('Internal Server Error', { status: 500, statusText: 'Internal Server Error' });
     });
 
-    it('should handle network error', (done) => {
+    it('should handle network error', () => {
       service.login('admin', 'admin123').subscribe({
         next: () => {
           throw new Error('should have failed');
         },
         error: (error) => {
           expect(error.error).toBeTruthy();
-          done();
         }
       });
 
@@ -181,12 +178,11 @@ describe('AuthService', () => {
       req.error(new ProgressEvent('Network error'));
     });
 
-    it('should not store tokens on failed login', (done) => {
+    it('should not store tokens on failed login', () => {
       service.login('wrong', 'credentials').subscribe({
         error: () => {
           expect(localStorage.getItem('access_token')).toBeNull();
           expect(localStorage.getItem('refresh_token')).toBeNull();
-          done();
         }
       });
 
@@ -209,13 +205,16 @@ describe('AuthService', () => {
       expect(routerSpy.navigate).toHaveBeenCalledWith(['/auth/login']);
     });
 
-    it('should update isAuthenticated$ observable on logout', (done) => {
+    it('should update isAuthenticated$ observable on logout', () => {
+      let isAuthResult = true;
+
       service.logout();
 
       service.isAuthenticated$.subscribe(isAuth => {
-        expect(isAuth).toBe(false);
-        done();
+        isAuthResult = isAuth;
       });
+
+      expect(isAuthResult).toBe(false);
     });
 
     it('should clear tokens even if they dont exist', () => {
@@ -242,13 +241,12 @@ describe('AuthService', () => {
       localStorage.setItem('refresh_token', 'old-refresh-token');
     });
 
-    it('should refresh token successfully', (done) => {
+    it('should refresh token successfully', () => {
       service.refreshToken().subscribe({
         next: (response) => {
           expect(response).toEqual(mockRefreshResponse);
           expect(localStorage.getItem('access_token')).toBe(mockRefreshResponse.access_token);
           expect(localStorage.getItem('refresh_token')).toBe(mockRefreshResponse.refresh_token);
-          done();
         }
       });
 
@@ -259,19 +257,22 @@ describe('AuthService', () => {
       req.flush(mockRefreshResponse);
     });
 
-    it('should update isAuthenticated$ observable on successful refresh', (done) => {
+    it('should update isAuthenticated$ observable on successful refresh', () => {
+      let isAuthResult = false;
+
       service.refreshToken().subscribe(() => {
         service.isAuthenticated$.subscribe(isAuth => {
-          expect(isAuth).toBe(true);
-          done();
+          isAuthResult = isAuth;
         });
       });
 
       const req = httpMock.expectOne(`${API_URL}/autenticacao/refresh`);
       req.flush(mockRefreshResponse);
+
+      expect(isAuthResult).toBe(true);
     });
 
-    it('should handle refresh without refresh_token in response', (done) => {
+    it('should handle refresh without refresh_token in response', () => {
       const responseWithoutRefresh = {
         access_token: 'new-access-token-only'
       };
@@ -281,7 +282,6 @@ describe('AuthService', () => {
           expect(response).toEqual(responseWithoutRefresh);
           expect(localStorage.getItem('access_token')).toBe('new-access-token-only');
           expect(localStorage.getItem('refresh_token')).toBe('old-refresh-token');
-          done();
         }
       });
 
@@ -289,7 +289,7 @@ describe('AuthService', () => {
       req.flush(responseWithoutRefresh);
     });
 
-    it('should handle expired refresh token and logout', (done) => {
+    it('should handle expired refresh token and logout', () => {
       service.refreshToken().subscribe({
         next: () => {
           throw new Error('should have failed');
@@ -299,7 +299,6 @@ describe('AuthService', () => {
           expect(localStorage.getItem('access_token')).toBeNull();
           expect(localStorage.getItem('refresh_token')).toBeNull();
           expect(routerSpy.navigate).toHaveBeenCalledWith(['/auth/login']);
-          done();
         }
       });
 
@@ -307,7 +306,7 @@ describe('AuthService', () => {
       req.flush('Refresh token expired', { status: 401, statusText: 'Unauthorized' });
     });
 
-    it('should handle missing refresh token', (done) => {
+    it('should handle missing refresh token', () => {
       localStorage.removeItem('refresh_token');
 
       service.refreshToken().subscribe({
@@ -317,14 +316,13 @@ describe('AuthService', () => {
         error: (error) => {
           expect(error.message).toBe('No refresh token available');
           expect(routerSpy.navigate).toHaveBeenCalledWith(['/auth/login']);
-          done();
         }
       });
 
       httpMock.expectNone(`${API_URL}/autenticacao/refresh`);
     });
 
-    it('should update both tokens on successful refresh', (done) => {
+    it('should update both tokens on successful refresh', () => {
       const oldToken = localStorage.getItem('access_token');
       const oldRefreshToken = localStorage.getItem('refresh_token');
 
@@ -334,7 +332,6 @@ describe('AuthService', () => {
           expect(localStorage.getItem('refresh_token')).not.toBe(oldRefreshToken);
           expect(localStorage.getItem('access_token')).toBe(mockRefreshResponse.access_token);
           expect(localStorage.getItem('refresh_token')).toBe(mockRefreshResponse.refresh_token);
-          done();
         }
       });
 
@@ -342,7 +339,7 @@ describe('AuthService', () => {
       req.flush(mockRefreshResponse);
     });
 
-    it('should handle server error during refresh and logout', (done) => {
+    it('should handle server error during refresh and logout', () => {
       service.refreshToken().subscribe({
         next: () => {
           throw new Error('should have failed');
@@ -350,7 +347,6 @@ describe('AuthService', () => {
         error: (error: HttpErrorResponse) => {
           expect(error.status).toBe(500);
           expect(routerSpy.navigate).toHaveBeenCalledWith(['/auth/login']);
-          done();
         }
       });
 
@@ -415,14 +411,13 @@ describe('AuthService', () => {
   });
 
   describe('register', () => {
-    it('should register a new user', (done) => {
+    it('should register a new user', () => {
       const username = 'newuser';
       const password = 'newpass123';
 
       service.register(username, password).subscribe({
         next: (response) => {
           expect(response).toBeTruthy();
-          done();
         }
       });
 
@@ -433,14 +428,13 @@ describe('AuthService', () => {
       req.flush({ success: true, message: 'User registered' });
     });
 
-    it('should handle registration with duplicate username', (done) => {
+    it('should handle registration with duplicate username', () => {
       service.register('existinguser', 'password').subscribe({
         next: () => {
           throw new Error('should have failed');
         },
         error: (error: HttpErrorResponse) => {
           expect(error.status).toBe(409);
-          done();
         }
       });
 
@@ -448,14 +442,13 @@ describe('AuthService', () => {
       req.flush('Username already exists', { status: 409, statusText: 'Conflict' });
     });
 
-    it('should handle validation error during registration', (done) => {
+    it('should handle validation error during registration', () => {
       service.register('', '').subscribe({
         next: () => {
           throw new Error('should have failed');
         },
         error: (error: HttpErrorResponse) => {
           expect(error.status).toBe(400);
-          done();
         }
       });
 
@@ -465,7 +458,7 @@ describe('AuthService', () => {
   });
 
   describe('Token Management Flow', () => {
-    it('should handle complete authentication flow', (done) => {
+    it('should handle complete authentication flow', () => {
       // Login
       service.login('admin', 'admin123').subscribe(() => {
         expect(service.isAuthenticated()).toBe(true);
@@ -475,14 +468,13 @@ describe('AuthService', () => {
         service.logout();
         expect(service.isAuthenticated()).toBe(false);
         expect(service.getToken()).toBeNull();
-        done();
       });
 
       const loginReq = httpMock.expectOne(`${API_URL}/autenticacao/login`);
       loginReq.flush(mockLoginResponse);
     });
 
-    it('should handle token refresh in authenticated session', (done) => {
+    it('should handle token refresh in authenticated session', () => {
       // Initial login
       localStorage.setItem('access_token', 'old-token');
       localStorage.setItem('refresh_token', 'old-refresh');
@@ -493,14 +485,13 @@ describe('AuthService', () => {
       service.refreshToken().subscribe(() => {
         expect(service.isAuthenticated()).toBe(true);
         expect(service.getToken()).toBe(mockRefreshResponse.access_token);
-        done();
       });
 
       const refreshReq = httpMock.expectOne(`${API_URL}/autenticacao/refresh`);
       refreshReq.flush(mockRefreshResponse);
     });
 
-    it('should logout user when refresh token fails', (done) => {
+    it('should logout user when refresh token fails', () => {
       localStorage.setItem('access_token', 'old-token');
       localStorage.setItem('refresh_token', 'expired-refresh');
 
@@ -508,7 +499,6 @@ describe('AuthService', () => {
         error: () => {
           expect(service.isAuthenticated()).toBe(false);
           expect(routerSpy.navigate).toHaveBeenCalledWith(['/auth/login']);
-          done();
         }
       });
 
@@ -545,7 +535,7 @@ describe('AuthService', () => {
   });
 
   describe('Security', () => {
-    it('should not expose password in request', (done) => {
+    it('should not expose password in request', () => {
       service.login('admin', 'secret-password').subscribe();
 
       const req = httpMock.expectOne(`${API_URL}/autenticacao/login`);
@@ -553,7 +543,6 @@ describe('AuthService', () => {
       expect(req.request.body.password).toBe('secret-password');
       
       req.flush(mockLoginResponse);
-      done();
     });
 
     it('should clear sensitive data on logout', () => {
@@ -589,7 +578,7 @@ describe('AuthService', () => {
   });
 
   describe('isAuthenticated$ Observable', () => {
-    it('should emit false initially when no token exists', (done) => {
+    it('should emit false initially when no token exists', () => {
       localStorage.clear();
       
       const newService = new AuthService(
@@ -597,13 +586,15 @@ describe('AuthService', () => {
         TestBed.inject(Router)
       );
 
+      let isAuthResult = true;
       newService.isAuthenticated$.subscribe(isAuth => {
-        expect(isAuth).toBe(false);
-        done();
+        isAuthResult = isAuth;
       });
+
+      expect(isAuthResult).toBe(false);
     });
 
-    it('should emit true initially when token exists', (done) => {
+    it('should emit true initially when token exists', () => {
       localStorage.setItem('access_token', 'existing-token');
       
       const newService = new AuthService(
@@ -611,20 +602,22 @@ describe('AuthService', () => {
         TestBed.inject(Router)
       );
 
+      let isAuthResult = false;
       newService.isAuthenticated$.subscribe(isAuth => {
-        expect(isAuth).toBe(true);
-        done();
+        isAuthResult = isAuth;
       });
+
+      expect(isAuthResult).toBe(true);
     });
 
-    it('should emit true after successful login', (done) => {
+    it('should emit true after successful login', () => {
       let emissionCount = 0;
+      let finalAuth = false;
       
       service.isAuthenticated$.subscribe(isAuth => {
         emissionCount++;
         if (emissionCount === 2) {
-          expect(isAuth).toBe(true);
-          done();
+          finalAuth = isAuth;
         }
       });
 
@@ -632,21 +625,25 @@ describe('AuthService', () => {
 
       const req = httpMock.expectOne(`${API_URL}/autenticacao/login`);
       req.flush(mockLoginResponse);
+
+      expect(finalAuth).toBe(true);
     });
 
-    it('should emit false after logout', (done) => {
+    it('should emit false after logout', () => {
       localStorage.setItem('access_token', 'token');
       let emissionCount = 0;
+      let finalAuth = true;
       
       service.isAuthenticated$.subscribe(isAuth => {
         emissionCount++;
         if (emissionCount === 2) {
-          expect(isAuth).toBe(false);
-          done();
+          finalAuth = isAuth;
         }
       });
 
       service.logout();
+
+      expect(finalAuth).toBe(false);
     });
   });
 });

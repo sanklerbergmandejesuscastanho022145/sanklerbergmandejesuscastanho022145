@@ -5,10 +5,9 @@ import { TutorListComponent } from './tutor-list';
 import { TutorService, Tutor } from '../../../services/tutor.service';
 import { AuthService } from '../../../services/auth.service';
 import { Router } from '@angular/router';
-import { of, throwError } from 'rxjs';
+import { of, throwError, Observable } from 'rxjs';
 import { HttpErrorResponse } from '@angular/common/http';
 import { vi } from 'vitest';
-import { ChangeDetectorRef } from '@angular/core';
 
 describe('TutorListComponent', () => {
   let component: TutorListComponent;
@@ -16,7 +15,6 @@ describe('TutorListComponent', () => {
   let tutorService: any;
   let authService: any;
   let router: any;
-  let cdr: any;
 
   const mockTutores: Tutor[] = [
     {
@@ -38,7 +36,8 @@ describe('TutorListComponent', () => {
       id: 2,
       nome: 'Maria Santos',
       telefone: '11988888888',
-      endereco: 'Av.cpf: 98765432100',
+      endereco: 'Av. Principal, 456',
+      cpf: '98765432100',
       email: 'maria@email.com',
       foto: null,
       pets: []
@@ -59,17 +58,12 @@ describe('TutorListComponent', () => {
       navigate: vi.fn()
     };
 
-    cdr = {
-      detectChanges: vi.fn()
-    };
-
     await TestBed.configureTestingModule({
       imports: [TutorListComponent],
       providers: [
         { provide: TutorService, useValue: tutorService },
         { provide: AuthService, useValue: authService },
-        { provide: Router, useValue: router },
-        { provide: ChangeDetectorRef, useValue: cdr }
+        { provide: Router, useValue: router }
       ]
     }).compileComponents();
 
@@ -82,13 +76,25 @@ describe('TutorListComponent', () => {
   });
 
   describe('loading behavior', () => {
-    it('should set loading to true when starting to load tutores', () => {
-      tutorService.listarTutores.mockReturnValue(of(mockTutores));
+    it('should set loading to true when starting to load tutores', async () => {
+      let resolveObservable: any;
+      const delayedObservable = new Observable(subscriber => {
+        resolveObservable = () => {
+          subscriber.next(mockTutores);
+          subscriber.complete();
+        };
+      });
+      
+      tutorService.listarTutores.mockReturnValue(delayedObservable);
       
       component.loading = false;
       component.carregarTutores();
       
+      await new Promise(resolve => setTimeout(resolve, 0));
+      
       expect(component.loading).toBe(true);
+      
+      resolveObservable();
     });
 
     it('should set loading to false after successfully loading tutores', async () => {
@@ -96,11 +102,11 @@ describe('TutorListComponent', () => {
       
       component.carregarTutores();
       
-      await new Promise(resolve => setTimeout(resolve, 100));
-      
-      expect(component.loading).toBe(false);
-      expect(component.tutores.length).toBe(2);
-      expect(component.tutoresFiltrados.length).toBe(2);
+      await vi.waitFor(() => {
+        expect(component.loading).toBe(false);
+        expect(component.tutores.length).toBe(2);
+        expect(component.tutoresFiltrados.length).toBe(2);
+      }, { timeout: 5000 });
     });
 
     it('should set loading to false after error loading tutores', async () => {
@@ -114,33 +120,48 @@ describe('TutorListComponent', () => {
       
       component.carregarTutores();
       
-      await new Promise(resolve => setTimeout(resolve, 100));
-      
-      expect(component.loading).toBe(false);
-      expect(component.tutores.length).toBe(0);
-      expect(component.tutoresFiltrados.length).toBe(0);
+      await vi.waitFor(() => {
+        expect(component.loading).toBe(false);
+        expect(component.tutores.length).toBe(0);
+        expect(component.tutoresFiltrados.length).toBe(0);
+      }, { timeout: 5000 });
     });
 
-    it('should clear tutores and tutoresFiltrados when starting to load', () => {
-      tutorService.listarTutores.mockReturnValue(of(mockTutores));
-      
+    it('should clear tutores and tutoresFiltrados when starting to load', async () => {
       component.tutores = [mockTutores[0]];
       component.tutoresFiltrados = [mockTutores[0]];
       
+      let resolveObservable: any;
+      const delayedObservable = new Observable(subscriber => {
+        resolveObservable = () => {
+          subscriber.next(mockTutores);
+          subscriber.complete();
+        };
+      });
+      
+      tutorService.listarTutores.mockReturnValue(delayedObservable);
+      
       component.carregarTutores();
+      
+      await new Promise(resolve => setTimeout(resolve, 0));
       
       expect(component.tutores).toEqual([]);
       expect(component.tutoresFiltrados).toEqual([]);
+      
+      resolveObservable();
     });
 
     it('should call detectChanges after loading tutores', async () => {
       tutorService.listarTutores.mockReturnValue(of(mockTutores));
       
+      const realCdr = (component as any).cdr;
+      vi.spyOn(realCdr, 'detectChanges');
+      
       component.carregarTutores();
       
       await new Promise(resolve => setTimeout(resolve, 100));
       
-      expect(cdr.detectChanges).toHaveBeenCalled();
+      expect(realCdr.detectChanges).toHaveBeenCalled();
     });
   });
 
@@ -156,11 +177,11 @@ describe('TutorListComponent', () => {
       
       component.carregarTutores();
       
-      await new Promise(resolve => setTimeout(resolve, 100));
-      
-      expect(component.loading).toBe(false);
-      expect(component.tutores).toEqual([]);
-      expect(component.errorMessage).toBe('Endpoint não encontrado. Verifique a URL da API.');
+      await vi.waitFor(() => {
+        expect(component.loading).toBe(false);
+        expect(component.tutores).toEqual([]);
+        expect(component.errorMessage).toBe('Endpoint não encontrado. Verifique a URL da API.');
+      }, { timeout: 5000 });
     });
 
     it('should handle 500 internal server error', async () => {
@@ -174,37 +195,33 @@ describe('TutorListComponent', () => {
       
       component.carregarTutores();
       
-      await new Promise(resolve => setTimeout(resolve, 100));
-      
-      expect(component.loading).toBe(false);
-      expect(component.tutores).toEqual([]);
-      expect(component.errorMessage).toBe('Erro ao carregar tutores');
+      await vi.waitFor(() => {
+        expect(component.loading).toBe(false);
+        expect(component.tutores).toEqual([]);
+        expect(component.errorMessage).toBe('Erro ao carregar tutores');
+      }, { timeout: 5000 });
     });
 
     it('should handle 401 unauthorized error and logout', async () => {
-      vi.useFakeTimers();
-      
-      const error401 = new HttpErrorResponse({
+      const errorResponse = new HttpErrorResponse({
         error: 'Unauthorized',
         status: 401,
         statusText: 'Unauthorized'
       });
-      
-      tutorService.listarTutores.mockReturnValue(throwError(() => error401));
+
+      tutorService.listarTutores.mockReturnValue(throwError(() => errorResponse));
       
       component.carregarTutores();
       
-      await new Promise(resolve => setTimeout(resolve, 100));
+      await vi.waitFor(() => {
+        expect(component.loading).toBe(false);
+        expect(component.errorMessage).toBe('Sessão expirada. Faça login novamente.');
+      }, { timeout: 10000 });
       
-      expect(component.loading).toBe(false);
-      expect(component.errorMessage).toBe('Sessão expirada. Faça login novamente.');
-      
-      vi.advanceTimersByTime(2000);
+      await new Promise(resolve => setTimeout(resolve, 2100));
       
       expect(authService.logout).toHaveBeenCalled();
-      
-      vi.useRealTimers();
-    });
+    }, 15000);
 
     it('should handle network error (status 0)', async () => {
       const networkError = new HttpErrorResponse({
@@ -219,11 +236,11 @@ describe('TutorListComponent', () => {
       
       component.carregarTutores();
       
-      await new Promise(resolve => setTimeout(resolve, 100));
-      
-      expect(component.loading).toBe(false);
-      expect(component.tutores).toEqual([]);
-      expect(component.errorMessage).toBe('Erro de conexão. Verifique sua internet ou se a API está disponível.');
+      await vi.waitFor(() => {
+        expect(component.loading).toBe(false);
+        expect(component.tutores).toEqual([]);
+        expect(component.errorMessage).toBe('Erro de conexão. Verifique sua internet ou se a API está disponível.');
+      }, { timeout: 5000 });
     });
 
     it('should handle empty response from API', async () => {
@@ -231,12 +248,12 @@ describe('TutorListComponent', () => {
       
       component.carregarTutores();
       
-      await new Promise(resolve => setTimeout(resolve, 100));
-      
-      expect(component.loading).toBe(false);
-      expect(component.tutores).toEqual([]);
-      expect(component.tutoresFiltrados).toEqual([]);
-      expect(component.errorMessage).toBe('');
+      await vi.waitFor(() => {
+        expect(component.loading).toBe(false);
+        expect(component.tutores).toEqual([]);
+        expect(component.tutoresFiltrados).toEqual([]);
+        expect(component.errorMessage).toBe('');
+      }, { timeout: 5000 });
     });
 
     it('should handle null response from API', async () => {
@@ -244,11 +261,11 @@ describe('TutorListComponent', () => {
       
       component.carregarTutores();
       
-      await new Promise(resolve => setTimeout(resolve, 100));
-      
-      expect(component.loading).toBe(false);
-      expect(component.tutores).toEqual([]);
-      expect(component.tutoresFiltrados).toEqual([]);
+      await vi.waitFor(() => {
+        expect(component.loading).toBe(false);
+        expect(component.tutores).toEqual([]);
+        expect(component.tutoresFiltrados).toEqual([]);
+      }, { timeout: 5000 });
     });
 
     it('should call detectChanges after error', async () => {
@@ -260,11 +277,14 @@ describe('TutorListComponent', () => {
       
       tutorService.listarTutores.mockReturnValue(throwError(() => error));
       
+      const realCdr = (component as any).cdr;
+      vi.spyOn(realCdr, 'detectChanges');
+      
       component.carregarTutores();
       
       await new Promise(resolve => setTimeout(resolve, 100));
       
-      expect(cdr.detectChanges).toHaveBeenCalled();
+      expect(realCdr.detectChanges).toHaveBeenCalled();
     });
   });
 
@@ -387,10 +407,10 @@ describe('TutorListComponent', () => {
       
       component.deletarTutor(1);
       
-      await new Promise(resolve => setTimeout(resolve, 100));
-      
-      expect(tutorService.deletarTutor).toHaveBeenCalledWith('1');
-      expect(tutorService.listarTutores).toHaveBeenCalled();
+      await vi.waitFor(() => {
+        expect(tutorService.deletarTutor).toHaveBeenCalledWith('1');
+        expect(tutorService.listarTutores).toHaveBeenCalled();
+      }, { timeout: 5000 });
     });
 
     it('should not delete tutor if user cancels', () => {
@@ -412,6 +432,7 @@ describe('TutorListComponent', () => {
       });
       
       tutorService.deletarTutor.mockReturnValue(throwError(() => error));
+      tutorService.listarTutores.mockReturnValue(of(mockTutores));
       
       component.deletarTutor(1);
       

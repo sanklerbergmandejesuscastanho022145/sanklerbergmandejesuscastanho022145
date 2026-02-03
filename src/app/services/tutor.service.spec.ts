@@ -1,10 +1,10 @@
-import '../../../../test-setup';
+import '../../test-setup';
 
 import { TestBed } from '@angular/core/testing';
 import { HttpClientTestingModule, HttpTestingController } from '@angular/common/http/testing';
 import { TutorService, Tutor, PaginatedResponse, Foto } from './tutor.service';
 import { HttpErrorResponse, HttpEventType } from '@angular/common/http';
-import { describe, it, expect, beforeEach, afterEach } from 'vitest';
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 
 describe('TutorService', () => {
   let service: TutorService;
@@ -29,7 +29,7 @@ describe('TutorService', () => {
     pets: []
   };
 
-  const mockT: Tutor[] = [
+  const mockTutores: Tutor[] = [
     mockTutor,
     {
       id: 2,
@@ -69,18 +69,18 @@ describe('TutorService', () => {
     localStorage.clear();
   });
 
-  it('should be created', () =>eTruthy();
+  it('should be created', () => {
+    expect(service).toBeTruthy();
   });
 
   describe('listarTutores', () => {
-    it('should return an array of tutores from paginated response', (done) => {
+    it('should return an array of tutores from paginated response', () => {
       service.listarTutores().subscribe({
         next: (tutores) => {
           expect(tutores).toEqual(mockTutores);
           expect(tutores.length).toBe(2);
           expect(tutores[0].nome).toBe('João Silva');
           expect(tutores[1].nome).toBe('Maria Santos');
-          done();
         }
       });
 
@@ -92,12 +92,11 @@ describe('TutorService', () => {
       req.flush(mockPaginatedResponse);
     });
 
-    it('should extract content from paginated response correctly', (done) => {
+    it('should extract content from paginated response correctly', () => {
       service.listarTutores().subscribe({
         next: (tutores) => {
           expect(Array.isArray(tutores)).toBe(true);
-          expect(toEqual(mockPaginatedResponse.content);
-          done();
+          expect(tutores).toEqual(mockPaginatedResponse.content);
         }
       });
 
@@ -105,7 +104,7 @@ describe('TutorService', () => {
       req.flush(mockPaginatedResponse);
     });
 
-    it('should handle empty content array', (done) => {
+    it('should handle empty content array', () => {
       const emptyResponse: PaginatedResponse<Tutor> = {
         page: 0,
         size: 10,
@@ -118,7 +117,6 @@ describe('TutorService', () => {
         next: (tutores) => {
           expect(tutores).toEqual([]);
           expect(tutores.length).toBe(0);
-          done();
         }
       });
 
@@ -126,22 +124,21 @@ describe('TutorService', () => {
       req.flush(emptyResponse);
     });
 
-    it('should handle 401 unauthorized error', (done) => {
+    it('should handle 401 unauthorized error', () => {
       service.listarTutores().subscribe({
         next: () => {
           throw new Error('should have failed');
         },
         error: (error: HttpErrorResponse) => {
           expect(error.status).toBe(401);
-          done();
         }
       });
 
-      const req = httpMock.expectOne(`${API`);
+      const req = httpMock.expectOne(`${API_URL}/v1/tutores`);
       req.flush('Unauthorized', { status: 401, statusText: 'Unauthorized' });
     });
 
-    it('should include authorization token in headers', (done) => {
+    it('should include authorization token in headers', () => {
       service.listarTutores().subscribe();
 
       const req = httpMock.expectOne(`${API_URL}/v1/tutores`);
@@ -149,34 +146,31 @@ describe('TutorService', () => {
       expect(req.request.headers.get('Authorization')).toBe('Bearer fake-jwt-token');
 
       req.flush(mockPaginatedResponse);
-      done();
     });
 
-    it('should log error and rethrow on failure', (done) => {
+    it('should log error and rethrow on failure', () => {
       const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
 
       service.listarTutores().subscribe({
         error: (error) => {
           expect(consoleErrorSpy).toHaveBeenCalledWith('Erro ao buscar tutores:', error);
           consoleErrorSpy.mockRestore();
-          done();
         }
       });
 
       const req = httpMock.expectOne(`${API_URL}/v1/tutores`);
-      req.flush('Error', { status: 500, status });
+      req.flush('Error', { status: 500, statusText: 'Internal Server Error' });
     });
   });
 
   describe('obterTutorPorId', () => {
-    it('should return a single tutor by id', (done) => {
+    it('should return a single tutor by id', () => {
       service.obterTutorPorId('1').subscribe({
         next: (tutor) => {
           expect(tutor).toEqual(mockTutor);
           expect(tutor.id).toBe(1);
           expect(tutor.nome).toBe('João Silva');
           expect(tutor.email).toBe('joao@email.com');
-          done();
         }
       });
 
@@ -187,28 +181,26 @@ describe('TutorService', () => {
       req.flush(mockTutor);
     });
 
-    it('should handle 404 when tutor not found', (done) => {
+    it('should handle 404 when tutor not found', () => {
       service.obterTutorPorId('999').subscribe({
         next: () => {
           throw new Error('should have failed');
         },
         error: (error: HttpErrorResponse) => {
           expect(error.status).toBe(404);
-          done();
         }
       });
 
       const req = httpMock.expectOne(`${API_URL}/v1/tutores/999`);
-      req.flush('Tutor not founText: 'Not Found' });
+      req.flush('Tutor not found', { status: 404, statusText: 'Not Found' });
     });
 
-    it('should return tutor without foto', (done) => {
+    it('should return tutor without foto', () => {
       const tutorSemFoto: Tutor = { ...mockTutor, foto: null };
 
       service.obterTutorPorId('1').subscribe({
         next: (tutor) => {
           expect(tutor.foto).toBeNull();
-          done();
         }
       });
 
@@ -216,7 +208,7 @@ describe('TutorService', () => {
       req.flush(tutorSemFoto);
     });
 
-    it('should return tutor with pets', (done) => {
+    it('should return tutor with pets', () => {
       const tutorComPets: Tutor = {
         ...mockTutor,
         pets: [
@@ -228,8 +220,7 @@ describe('TutorService', () => {
       service.obterTutorPorId('1').subscribe({
         next: (tutor) => {
           expect(tutor.pets).toBeDefined();
-          expect(tutor.pets?.
-          done();
+          expect(tutor.pets?.length).toBe(2);
         }
       });
 
@@ -237,14 +228,13 @@ describe('TutorService', () => {
       req.flush(tutorComPets);
     });
 
-    it('should log error and rethrow on failure', (done) => {
+    it('should log error and rethrow on failure', () => {
       const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
 
       service.obterTutorPorId('1').subscribe({
         error: (error) => {
           expect(consoleErrorSpy).toHaveBeenCalledWith('Erro ao buscar tutor:', error);
           consoleErrorSpy.mockRestore();
-          done();
         }
       });
 
@@ -254,7 +244,7 @@ describe('TutorService', () => {
   });
 
   describe('criarTutor', () => {
-    it('should create a new tutor', (done) => {
+    it('should create a new tutor', () => {
       const novoTutor: Tutor = {
         nome: 'Pedro Costa',
         email: 'pedro@email.com',
@@ -263,14 +253,13 @@ describe('TutorService', () => {
         cpf: '11122233344'
       };
 
-      const tutorCriado: ...novoTutor, id: 3 };
+      const tutorCriado: Tutor = { ...novoTutor, id: 3 };
 
       service.criarTutor(novoTutor).subscribe({
         next: (tutor) => {
           expect(tutor).toEqual(tutorCriado);
           expect(tutor.id).toBe(3);
           expect(tutor.nome).toBe('Pedro Costa');
-          done();
         }
       });
 
@@ -283,7 +272,7 @@ describe('TutorService', () => {
       req.flush(tutorCriado);
     });
 
-    it('should handle validation error when creating tutor', (done) => {
+    it('should handle validation error when creating tutor', () => {
       const tutorInvalido: Tutor = { nome: '', email: 'invalid-email', telefone: '', endereco: '' };
 
       service.criarTutor(tutorInvalido).subscribe({
@@ -292,13 +281,14 @@ describe('TutorService', () => {
         },
         error: (error: HttpErrorResponse) => {
           expect(error.status).toBe(400);
-          done
+        }
+      });
 
       const req = httpMock.expectOne(`${API_URL}/v1/tutores`);
       req.flush('Validation error', { status: 400, statusText: 'Bad Request' });
     });
 
-    it('should handle duplicate CPF error', (done) => {
+    it('should handle duplicate CPF error', () => {
       const tutorDuplicado: Tutor = {
         nome: 'João Silva',
         email: 'outro@email.com',
@@ -313,7 +303,6 @@ describe('TutorService', () => {
         },
         error: (error: HttpErrorResponse) => {
           expect(error.status).toBe(409);
-          done();
         }
       });
 
@@ -321,14 +310,13 @@ describe('TutorService', () => {
       req.flush('CPF already exists', { status: 409, statusText: 'Conflict' });
     });
 
-    it('should log error and rethrow on failure', (done) => {
+    it('should log error and rethrow on failure', () => {
       const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
 
       service.criarTutor({ nome: 'Test', telefone: '', endereco: '' }).subscribe({
         error: (error) => {
-          expect(consoleErrorSledWith('Erro ao criar tutor:', error);
+          expect(consoleErrorSpy).toHaveBeenCalledWith('Erro ao criar tutor:', error);
           consoleErrorSpy.mockRestore();
-          done();
         }
       });
 
@@ -338,7 +326,7 @@ describe('TutorService', () => {
   });
 
   describe('atualizarTutor', () => {
-    it('should update an existing tutor', (done) => {
+    it('should update an existing tutor', () => {
       const tutorAtualizado: Tutor = {
         id: 1,
         nome: 'João Silva Updated',
@@ -353,19 +341,18 @@ describe('TutorService', () => {
           expect(tutor).toEqual(tutorAtualizado);
           expect(tutor.nome).toBe('João Silva Updated');
           expect(tutor.email).toBe('joao.novo@email.com');
-          done();
         }
       });
 
       const req = httpMock.expectOne(`${API_URL}/v1/tutores/1`);
       expect(req.request.method).toBe('PUT');
       expect(req.request.body).toEqual(tutorAtualizado);
-      expect(req.request.e('Bearer fake-jwt-token');
+      expect(req.request.headers.get('Authorization')).toBe('Bearer fake-jwt-token');
 
       req.flush(tutorAtualizado);
     });
 
-    it('should handle 404 when updating non-existent tutor', (done) => {
+    it('should handle 404 when updating non-existent tutor', () => {
       const tutorAtualizado: Tutor = { nome: 'Inexistente', telefone: '', endereco: '' };
 
       service.atualizarTutor(999, tutorAtualizado).subscribe({
@@ -374,7 +361,6 @@ describe('TutorService', () => {
         },
         error: (error: HttpErrorResponse) => {
           expect(error.status).toBe(404);
-          done();
         }
       });
 
@@ -382,13 +368,12 @@ describe('TutorService', () => {
       req.flush('Tutor not found', { status: 404, statusText: 'Not Found' });
     });
 
-    it('should update tutor with partial data', (done) => {
+    it('should update tutor with partial data', () => {
       const tutorParcial: Tutor = { nome: 'João', telefone: '11966666666', endereco: 'Rua X' };
 
       service.atualizarTutor(1, tutorParcial).subscribe({
         next: (tutor) => {
-          expect(tutortelefone).toBe('11966666666');
-          done();
+          expect(tutor.telefone).toBe('11966666666');
         }
       });
 
@@ -396,14 +381,13 @@ describe('TutorService', () => {
       req.flush({ ...mockTutor, telefone: '11966666666' });
     });
 
-    it('should log error and rethrow on failure', (done) => {
+    it('should log error and rethrow on failure', () => {
       const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
 
       service.atualizarTutor(1, { nome: 'Test', telefone: '', endereco: '' }).subscribe({
         error: (error) => {
           expect(consoleErrorSpy).toHaveBeenCalledWith('Erro ao atualizar tutor:', error);
           consoleErrorSpy.mockRestore();
-          done();
         }
       });
 
@@ -413,15 +397,14 @@ describe('TutorService', () => {
   });
 
   describe('uploadFotoTutor', () => {
-    it('should upload tutor photo successfully', (done) => {
+    it('should upload tutor photo successfully', () => {
       const file = new File(['fake content'], 'tutor-photo.jpg', { type: 'image/jpeg' });
-      const tutorI1';
+      const tutorId = '1';
 
       service.uploadFotoTutor(tutorId, file).subscribe({
         next: (event) => {
           if (event.type === HttpEventType.Response) {
             expect(event.body).toBeTruthy();
-            done();
           }
         }
       });
@@ -436,20 +419,28 @@ describe('TutorService', () => {
       req.flush({ success: true, foto: mockFoto });
     });
 
-    it('should handle upload error', (done) => {
-      const file = new File(['fake content'], 'tutor-photo.jpg', { type: 'image/jpeg' });
+    it('should handle upload error', () => {
+    expect.assertions(1);
 
-      service.uploadFotoTutor('1', file).subscribe({
-        next: () => {
-          throw new Error('should have failed');
-        },
-        error: (error: HttpErrorResponse) => {
-          expect(error.status).toBe(500);
-          done(); req = httpMock.expectOne(`${API_URL}/v1/tutores/1/fotos`);
-      req.flush('Upload failed', { status: 500, statusText: 'Internal Server Error' });
+    const file = new File(['fake content'], 'tutor-photo.jpg', { type: 'image/jpeg' });
+
+    service.uploadFotoTutor('1', file).subscribe({
+      next: () => {
+        expect.fail('Should have failed with error');
+      },
+      error: (error: HttpErrorResponse) => {
+        expect(error.status).toBe(500); 
+      }
     });
 
-    it('should include FormData with foto field', (done) => {
+    const req = httpMock.expectOne(`${API_URL}/v1/tutores/1/fotos`);
+    req.flush(
+    { message: 'Upload failed' },
+    { status: 500, statusText: 'Internal Server Error' }
+    );
+    });
+
+    it('should include FormData with foto field', () => {
       const file = new File(['content'], 'test.jpg', { type: 'image/jpeg' });
 
       service.uploadFotoTutor('1', file).subscribe();
@@ -461,17 +452,16 @@ describe('TutorService', () => {
       expect((formData.get('foto') as File).name).toBe('test.jpg');
 
       req.flush({ success: true });
-      done();
     });
 
-    it('should log error and rethrow on upload failure', (done) => {
+    it('should log error and rethrow on upload failure', () => {
       const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
       const file = new File(['content'], 'test.jpg', { type: 'image/jpeg' });
 
       service.uploadFotoTutor('1', file).subscribe({
         error: (error) => {
-          expect(consoleErrorSpy).toHaveBeenCalledWith('Erro ao fazerconsoleErrorSpy.mockRestore();
-          done();
+          expect(consoleErrorSpy).toHaveBeenCalledWith('Erro ao fazer upload da foto:', error);
+          consoleErrorSpy.mockRestore();
         }
       });
 
@@ -481,11 +471,10 @@ describe('TutorService', () => {
   });
 
   describe('deletarTutor', () => {
-    it('should delete a tutor by id', (done) => {
+    it('should delete a tutor by id', () => {
       service.deletarTutor('1').subscribe({
         next: (response) => {
-          expect(response).toBeUndefined();
-          done();
+          expect(response).toBeNull();
         }
       });
 
@@ -496,14 +485,13 @@ describe('TutorService', () => {
       req.flush(null);
     });
 
-    it('should handle 404 when deleting non-existent tutor', (done) => {
+    it('should handle 404 when deleting non-existent tutor', () => {
       service.deletarTutor('999').subscribe({
         next: () => {
           throw new Error('should have failed');
         },
         error: (error: HttpErrorResponse) => {
           expect(error.status).toBe(404);
-          done();
         }
       });
 
@@ -511,14 +499,13 @@ describe('TutorService', () => {
       req.flush('Tutor not found', { status: 404, statusText: 'Not Found' });
     });
 
-    it('should handle constraint violation when tutor has pets', (done) => {
+    it('should handle constraint violation when tutor has pets', () => {
       service.deletarTutor('1').subscribe({
         next: () => {
           throw new Error('should have failed');
         },
         error: (error: HttpErrorResponse) => {
           expect(error.status).toBe(409);
-          done();
         }
       });
 
@@ -526,14 +513,13 @@ describe('TutorService', () => {
       req.flush('Cannot delete tutor with pets', { status: 409, statusText: 'Conflict' });
     });
 
-    it('should log error and rethrow on failure', (done) => {
+    it('should log error and rethrow on failure', () => {
       const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
 
       service.deletarTutor('1').subscribe({
         error: (error) => {
           expect(consoleErrorSpy).toHaveBeenCalledWith('Erro ao deletar tutor:', error);
           consoleErrorSpy.mockRestore();
-          done();
         }
       });
 
@@ -543,14 +529,13 @@ describe('TutorService', () => {
   });
 
   describe('vincularPet', () => {
-    it('should link a pet to a tutor', (done) => {
+    it('should link a pet to a tutor', () => {
       const tutorId = '1';
       const petId = '5';
 
       service.vincularPet(tutorId, petId).subscribe({
         next: (response) => {
-          expect(response).toBeUndefined();
-          done();
+          expect(response).toBeNull();
         }
       });
 
@@ -562,14 +547,13 @@ describe('TutorService', () => {
       req.flush(null);
     });
 
-    it('should handle 404 when tutor not found', (done) => {
+    it('should handle 404 when tutor not found', () => {
       service.vincularPet('999', '1').subscribe({
         next: () => {
           throw new Error('should have failed');
         },
         error: (error: HttpErrorResponse) => {
           expect(error.status).toBe(404);
-          done();
         }
       });
 
@@ -577,14 +561,13 @@ describe('TutorService', () => {
       req.flush('Tutor not found', { status: 404, statusText: 'Not Found' });
     });
 
-    it('should handle 404 when pet not found', (done) => {
+    it('should handle 404 when pet not found', () => {
       service.vincularPet('1', '999').subscribe({
         next: () => {
           throw new Error('should have failed');
         },
         error: (error: HttpErrorResponse) => {
           expect(error.status).toBe(404);
-          done();
         }
       });
 
@@ -592,14 +575,13 @@ describe('TutorService', () => {
       req.flush('Pet not found', { status: 404, statusText: 'Not Found' });
     });
 
-    it('should handle already linked pet', (done) => {
+    it('should handle already linked pet', () => {
       service.vincularPet('1', '1').subscribe({
         next: () => {
           throw new Error('should have failed');
         },
         error: (error: HttpErrorResponse) => {
           expect(error.status).toBe(409);
-          done();
         }
       });
 
@@ -607,14 +589,13 @@ describe('TutorService', () => {
       req.flush('Pet already linked', { status: 409, statusText: 'Conflict' });
     });
 
-    it('should log error and rethrow on failure', (done) => {
+    it('should log error and rethrow on failure', () => {
       const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
 
       service.vincularPet('1', '1').subscribe({
         error: (error) => {
           expect(consoleErrorSpy).toHaveBeenCalledWith('Erro ao vincular pet:', error);
           consoleErrorSpy.mockRestore();
-          done();
         }
       });
 
@@ -624,14 +605,13 @@ describe('TutorService', () => {
   });
 
   describe('desvincularPet', () => {
-    it('should unlink a pet from a tutor', (done) => {
+    it('should unlink a pet from a tutor', () => {
       const tutorId = '1';
       const petId = '5';
 
       service.desvincularPet(tutorId, petId).subscribe({
         next: (response) => {
-          expect(response).toBeUndefined();
-          done();
+          expect(response).toBeNull();
         }
       });
 
@@ -642,14 +622,13 @@ describe('TutorService', () => {
       req.flush(null);
     });
 
-    it('should handle 404 when tutor not found', (done) => {
+    it('should handle 404 when tutor not found', () => {
       service.desvincularPet('999', '1').subscribe({
         next: () => {
           throw new Error('should have failed');
         },
         error: (error: HttpErrorResponse) => {
           expect(error.status).toBe(404);
-          done();
         }
       });
 
@@ -657,14 +636,13 @@ describe('TutorService', () => {
       req.flush('Tutor not found', { status: 404, statusText: 'Not Found' });
     });
 
-    it('should handle pet not linked to tutor', (done) => {
+    it('should handle pet not linked to tutor', () => {
       service.desvincularPet('1', '999').subscribe({
         next: () => {
           throw new Error('should have failed');
         },
         error: (error: HttpErrorResponse) => {
           expect(error.status).toBe(404);
-          done();
         }
       });
 
@@ -672,14 +650,13 @@ describe('TutorService', () => {
       req.flush('Pet not linked to this tutor', { status: 404, statusText: 'Not Found' });
     });
 
-    it('should log error and rethrow on failure', (done) => {
+    it('should log error and rethrow on failure', () => {
       const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
 
       service.desvincularPet('1', '1').subscribe({
         error: (error) => {
           expect(consoleErrorSpy).toHaveBeenCalledWith('Erro ao desvincular pet:', error);
           consoleErrorSpy.mockRestore();
-          done();
         }
       });
 
