@@ -404,7 +404,7 @@ describe('PetsService', () => {
 
       service.uploadFotoPet('1', file).subscribe({
         next: () => {
-          throw new Error('should have failed');
+          expect.fail('should have failed');
         },
         error: (error: HttpErrorResponse) => {
           expect(error.status).toBe(500);
@@ -412,7 +412,7 @@ describe('PetsService', () => {
       });
 
       const req = httpMock.expectOne(`${API_URL}/v1/pets/1/fotos`);
-      req.flush('Upload failed', { status: 500, statusText: 'Internal Server Error' });
+      req.flush({ error: 'Upload failed' }, { status: 500, statusText: 'Internal Server Error' });
     });
 
     it('should handle file size limit error', () => {
@@ -450,7 +450,7 @@ describe('PetsService', () => {
     it('should delete a pet by id', () => {
       service.deletarPet(1).subscribe({
         next: (response) => {
-          expect(response).toBeUndefined();
+          expect(response).toBeNull();
         }
       });
 
