@@ -1,0 +1,13 @@
+version: '3.8'
+
+services:
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "4200:80"
+    container_name: pet-management-frontend
+    restart: unless-stopped
+    environment:
+      - NODE_ENV=production

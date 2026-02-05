@@ -1,38 +1,10 @@
 # PET MAISPERTO MATO GROSSO
-
-## Pré-requisitos
-
-Antes de começar, certifique-se de ter instalado:
-
-- **Node.js** (versão 18.x ou superior)
-- **npm** (versão 9.x ou superior)
-- **Angular CLI** (versão 19.x)
-
-## Verifique as versões instaladas
-node --version
-npm --version
-ng version
-
-## Instalação
-git clone ""
-cd pet-maisperto-mt
-
-## Instale as dependências
-npm install
-
-## Execute o projeto
-ng serve --open
-
-## Para testes unitarios
-npm install zone.js --legacy-peer-deps
-npm install -D @analogjs/vite-plugin-angular --legacy-peer-deps
-
-### PENDENTES DE SEGUIR PROJETO**
-
-- TESTES UNITARIOS
-- ● Empacotar artefato em container com todas as dependências isoladas.
-- ● README.md com documentação da arquitetura, dados de inscrição, vaga e como executar/testar.
-- PAGINA DE REGISTRO(não obrigatorio)
+### 👤 Dados de Inscrição
+Nome: Sankler Bergman de Jesus Castanho
+Email: sanklerbergman@gmail.com
+Vaga: Engenheiro da Computação - Sênior 
+Inscrição: 16320
+Repositório: [\[URL DO REPOSITÓRIO\]](https://github.com/sanklerbergmandejesuscastanho022145/sanklerbergmandejesuscastanho022145)
 
 ### FINALIZADOS(ORDEM DE PRIORIDADE)
 - tela de login,auth guard, interceptors e modulos
@@ -46,3 +18,75 @@ npm install -D @analogjs/vite-plugin-angular --legacy-peer-deps
 - tshoot buscar dados de edição do tutor(dentro detalhes) ao clicar em editar
 - tshoot buscar dados de edição do pet(dentro detalhes) ao clicar em editar
 - VALIDAÇÃO DE RESPONSIVIDADE
+- TESTES UNITARIOS
+- ● Empacotar artefato em container com todas as dependências isoladas.
+- ● README.md com documentação da arquitetura, dados de inscrição, vaga e como executar/testar.
+
+
+# Sistema de Gerenciamento de Pets
+
+Sistema web desenvolvido em Angular para gerenciamento de pets e seus tutores.
+
+## 📋 Sobre o Projeto
+
+Sistema que permite cadastrar, visualizar, editar e excluir pets, com suporte a múltiplos tutores por pet.
+
+---
+
+## 🏗️ Arquitetura
+┌─────────────────────────┐ │ Componentes Angular │ │ (Lista/Detalhes/Form) │ └───────────┬─────────────┘ │ ┌───────────▼─────────────┐ │ Services (Pet/Image) │ │ Comunicação HTTP │ └───────────┬─────────────┘ │ ┌───────────▼─────────────┐ │ API REST │ │ (Backend/Database) │ └─────────────────────────┘
+
+
+### Tecnologias
+
+- Angular 17+
+- TypeScript
+- RxJS
+- Docker + Nginx
+
+---
+
+## 🚀 Como Executar
+
+### Com Docker (Recomendado)
+
+# Build e execução
+docker build -t pet-app .
+docker run -d -p 4200:80 pet-app
+docker ps (Valide que o container foi inciado com sucesso)
+
+# Acesse: http://localhost:4200
+
+# Credenciais de acesso ao sistema
+Login: admin
+Senha: admin
+
+### Ambiente Local
+# Instalar dependências
+npm install
+
+# Configurar URL da API em src/environments/environment.ts
+
+# Executar
+npm start
+
+# Acesse: http://localhost:4200
+
+### 🧪 Como Testar
+# Testes unitários
+npm test
+
+# Testes com coverage
+npm run test:coverage
+
+## Scripts Disponíveis
+npm start              # Desenvolvimento
+
+npm run build:prod     # Build produção
+
+npm test              # Testes
+
+docker build -t pet-app .    # Build Docker
+
+docker run -d -p 4200:80 pet-app  # Executar Docker
+
