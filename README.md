@@ -34,7 +34,21 @@ Sistema que permite cadastrar, visualizar, editar e excluir pets, com suporte a 
 ---
 
 ## 🏗️ Arquitetura
-┌─────────────────────────┐ │ Componentes Angular │ │ (Lista/Detalhes/Form) │ └───────────┬─────────────┘ │ ┌───────────▼─────────────┐ │ Services (Pet/Image) │ │ Comunicação HTTP │ └───────────┬─────────────┘ │ ┌───────────▼─────────────┐ │ API REST │ │ (Backend/Database) │ └─────────────────────────┘
+┌─────────────────────────────┐
+│     Componentes Angular     │
+│  (Lista / Detalhes / Form)  │
+└───────────────┬─────────────┘
+                │
+┌───────────────▼─────────────┐
+│           Services          │
+│        (Pet / Image)        │
+│     Comunicação HTTP        │
+└───────────────┬─────────────┘
+                │
+┌───────────────▼─────────────┐
+│          API REST           │
+│     (Backend / Database)    │
+└─────────────────────────────┘
 
 
 ### Tecnologias
@@ -51,9 +65,11 @@ Sistema que permite cadastrar, visualizar, editar e excluir pets, com suporte a 
 ### Com Docker (Recomendado)
 
 # Build e execução
-docker build -t pet-app .
-docker run -d -p 4200:80 pet-app
-docker ps (Valide que o container foi inciado com sucesso)
+```bash
+- docker build -t pet-app .
+- docker run -d -p 4200:80 pet-app
+- docker ps (Valide que o container foi inciado com sucesso)
+```
 
 # Acesse: http://localhost:4200
 
