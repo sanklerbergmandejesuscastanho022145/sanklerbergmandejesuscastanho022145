@@ -11,7 +11,6 @@
       </div>
     </div>
 
-    
     <div class="pet-details">
       <div class="detail-item">
         <span class="detail-label">ID:</span>
@@ -28,16 +27,30 @@
         <span class="detail-value">{{ pet.idade }} anos</span>
       </div>
 
-      <div class="detail-item" *ngIf="pet.tutores?.length">
-      <span class="detail-label">Tutores:</span>
-      <span class="detail-value">
-        <span *ngFor="let tutor of pet.tutores ?? []; let last = last">
-          {{ tutor.nome }}<span *ngIf="!last">, </span>
-        </span>
-      </span>
+      <!-- Seção de Tutores - Exibe todos -->
+      <div class="tutores-section" *ngIf="pet.tutores && pet.tutores.length > 0">
+        <div class="tutor-info" *ngFor="let tutor of pet.tutores; let i = index">
+          <div class="detail-item">
+            <span class="detail-label">Tutor {{ i + 1 }}:</span>
+            <span class="detail-value">{{ tutor.nome }}</span>
+          </div>
+
+          <div class="detail-item" *ngIf="tutor.telefone">
+            <span class="detail-label">Telefone:</span>
+            <span class="detail-value">{{ tutor.telefone }}</span>
+          </div>
+
+          <div class="detail-item" *ngIf="tutor.email">
+            <span class="detail-label">Email:</span>
+            <span class="detail-value">{{ tutor.email }}</span>
+          </div>
+
+          <!-- Separador visual entre tutores (exceto no último) -->
+          <hr *ngIf="i < pet.tutores.length - 1" class="tutor-separator">
+        </div>
       </div>
 
-
+      <!-- Mensagem quando não há tutores -->
       <div class="detail-item" *ngIf="!pet.tutores || pet.tutores.length === 0">
         <span class="detail-label">Tutores:</span>
         <span class="detail-value">Nenhum tutor cadastrado</span>

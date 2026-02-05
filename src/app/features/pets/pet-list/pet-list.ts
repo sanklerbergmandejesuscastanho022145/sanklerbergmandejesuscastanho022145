@@ -79,6 +79,18 @@ export class PetsListComponent implements OnInit {
     }
   }
 
+  navegarParaDetalhes(event: Event, id: number): void {
+  
+  const target = event.target as HTMLElement;
+  if (target.tagName === 'BUTTON' || target.closest('button')) {
+    return;
+  }
+  
+  if (id) {
+    this.router.navigate(['/pets', id.toString()]);
+  }
+  }
+
   limparBusca(): void {
     this.termoBusca = '';
     this.aplicarFiltro();

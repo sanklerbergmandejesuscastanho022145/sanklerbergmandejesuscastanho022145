@@ -2,14 +2,27 @@ $mt-azul: #003DA5;
 $mt-branco: #FFFFFF;
 $mt-verde: #009B3A;
 $mt-amarelo: #FFD100;
-$mt-azul-claro: #4A90E2;
+
+@mixin btn {
+  border: none;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+@mixin card {
+  background: $mt-branco;
+  border-radius: 16px;
+  box-shadow: 0 4px 20px rgba(0, 155, 58, 0.15);
+  border: 3px solid lighten($mt-verde, 50%);
+}
 
 .detail-container {
   max-width: 1200px;
   margin: 0 auto;
   padding: 20px;
-  font-family: Arial, sans-serif;
-  background: linear-gradient(180deg, $mt-branco 0%, #f5f5f5 100%);
+  background: linear-gradient(180deg, $mt-branco, #f5f5f5);
   min-height: 100vh;
 
   .loading {
@@ -17,41 +30,39 @@ $mt-azul-claro: #4A90E2;
     padding: 60px 20px;
     font-size: 20px;
     color: $mt-verde;
-    background: linear-gradient(135deg, $mt-branco 0%, lighten($mt-verde, 60%) 100%);
+    background: linear-gradient(135deg, $mt-branco, lighten($mt-verde, 60%));
     border-radius: 12px;
     border: 2px solid $mt-verde;
     font-weight: 600;
-    animation: pulse 1.5s ease-in-out infinite;
+    animation: pulse 1.5s infinite;
   }
 
-  .error-message {
+  .error-message, .success-message {
     padding: 20px;
-    background-color: lighten($mt-amarelo, 30%);
-    border-left: 4px solid darken($mt-verde, 10%);
-    color: darken($mt-verde, 20%);
     border-radius: 8px;
     margin-bottom: 20px;
     font-weight: 500;
+    animation: slideDown 0.3s;
+  }
+
+  .error-message {
+    background-color: lighten($mt-amarelo, 30%);
+    border-left: 4px solid darken($mt-verde, 10%);
+    color: darken($mt-verde, 20%);
     display: flex;
     justify-content: space-between;
     align-items: center;
-    animation: slideDown 0.3s ease;
   }
 
   .success-message {
-    padding: 15px 20px;
     background-color: lighten($mt-verde, 55%);
     border-left: 4px solid $mt-verde;
     color: darken($mt-verde, 20%);
-    border-radius: 8px;
-    margin-bottom: 20px;
-    font-weight: 600;
     text-align: center;
-    animation: slideDown 0.3s ease;
   }
 
   .tutor-detail {
-    animation: fadeIn 0.4s ease;
+    animation: fadeIn 0.4s;
 
     .detail-header {
       display: flex;
@@ -64,11 +75,7 @@ $mt-azul-claro: #4A90E2;
         color: $mt-verde;
         border: 2px solid $mt-verde;
         padding: 10px 20px;
-        border-radius: 8px;
-        font-size: 16px;
-        font-weight: 600;
-        cursor: pointer;
-        transition: all 0.3s ease;
+        @include btn;
 
         &:hover {
           background: lighten($mt-verde, 60%);
@@ -82,73 +89,56 @@ $mt-azul-claro: #4A90E2;
 
         button {
           padding: 10px 20px;
-          border: none;
-          border-radius: 8px;
-          font-size: 16px;
-          font-weight: 600;
-          cursor: pointer;
-          transition: all 0.3s ease;
+          @include btn;
         }
 
         .btn-edit {
           background: $mt-verde;
           color: $mt-branco;
-          box-shadow: 0 2px 8px rgba(0, 155, 58, 0.3);
 
           &:hover {
             background: darken($mt-verde, 10%);
             transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(0, 155, 58, 0.5);
           }
         }
 
         .btn-delete {
           background: darken($mt-amarelo, 5%);
           color: $mt-verde;
-          box-shadow: 0 2px 8px rgba(255, 209, 0, 0.3);
 
           &:hover {
             background: darken($mt-amarelo, 10%);
             transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(255, 209, 0, 0.5);
           }
         }
       }
     }
 
     .tutor-info-card {
-      background: $mt-branco;
-      border-radius: 16px;
+      @include card;
       padding: 30px;
-      box-shadow: 0 4px 20px rgba(0, 155, 58, 0.15);
       margin-bottom: 30px;
       display: flex;
       gap: 30px;
-      border: 3px solid lighten($mt-verde, 50%);
 
       .tutor-photo {
         flex-shrink: 0;
 
-        img {
+        img, .photo-placeholder {
           width: 200px;
           height: 200px;
           border-radius: 50%;
-          object-fit: cover;
           border: 4px solid $mt-verde;
-          box-shadow: 0 4px 16px rgba(0, 155, 58, 0.3);
         }
 
+        img { object-fit: cover; }
+
         .photo-placeholder {
-          width: 200px;
-          height: 200px;
-          border-radius: 50%;
-          background: linear-gradient(135deg, lighten($mt-verde, 50%) 0%, lighten($mt-verde, 60%) 100%);
+          background: linear-gradient(135deg, lighten($mt-verde, 50%), lighten($mt-verde, 60%));
           display: flex;
           align-items: center;
           justify-content: center;
           font-size: 80px;
-          border: 4px solid $mt-verde;
-          box-shadow: 0 4px 16px rgba(0, 155, 58, 0.2);
         }
       }
 
@@ -156,7 +146,7 @@ $mt-azul-claro: #4A90E2;
         flex: 1;
 
         h1 {
-          margin: 0 0 25px 0;
+          margin: 0 0 25px;
           color: $mt-verde;
           font-size: 32px;
           font-weight: 700;
@@ -174,16 +164,13 @@ $mt-azul-claro: #4A90E2;
             flex-direction: column;
             gap: 5px;
 
-            &.full-width {
-              grid-column: 1 / -1;
-            }
+            &.full-width { grid-column: 1 / -1; }
 
             .info-label {
               font-size: 13px;
               font-weight: 700;
               color: $mt-verde;
               text-transform: uppercase;
-              letter-spacing: 0.5px;
             }
 
             .info-value {
@@ -201,11 +188,8 @@ $mt-azul-claro: #4A90E2;
     }
 
     .pets-section {
-      background: $mt-branco;
-      border-radius: 16px;
+      @include card;
       padding: 30px;
-      box-shadow: 0 4px 20px rgba(0, 155, 58, 0.15);
-      border: 3px solid lighten($mt-verde, 50%);
 
       .section-header {
         display: flex;
@@ -225,19 +209,12 @@ $mt-azul-claro: #4A90E2;
         .btn-vincular {
           background: $mt-verde;
           color: $mt-branco;
-          border: none;
           padding: 12px 24px;
-          border-radius: 8px;
-          font-size: 16px;
-          font-weight: 600;
-          cursor: pointer;
-          transition: all 0.3s ease;
-          box-shadow: 0 2px 8px rgba(0, 155, 58, 0.3);
+          @include btn;
 
           &:hover:not(:disabled) {
             background: darken($mt-verde, 10%);
             transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(0, 155, 58, 0.5);
           }
 
           &:disabled {
@@ -253,12 +230,11 @@ $mt-azul-claro: #4A90E2;
         gap: 20px;
 
         .pet-card {
-          background: linear-gradient(135deg, $mt-branco 0%, lighten($mt-verde, 62%) 100%);
+          background: linear-gradient(135deg, $mt-branco, lighten($mt-verde, 62%));
           border-radius: 12px;
           overflow: hidden;
-          box-shadow: 0 3px 12px rgba(0, 155, 58, 0.15);
-          transition: all 0.3s ease;
           border: 2px solid lighten($mt-verde, 50%);
+          transition: all 0.3s;
 
           &:hover {
             transform: translateY(-5px);
@@ -268,7 +244,6 @@ $mt-azul-claro: #4A90E2;
           .pet-image {
             width: 100%;
             height: 200px;
-            overflow: hidden;
             background: lighten($mt-verde, 55%);
             display: flex;
             align-items: center;
@@ -290,7 +265,7 @@ $mt-azul-claro: #4A90E2;
             padding: 15px;
 
             h3 {
-              margin: 0 0 8px 0;
+              margin: 0 0 8px;
               color: $mt-verde;
               font-size: 20px;
               font-weight: 700;
@@ -300,7 +275,6 @@ $mt-azul-claro: #4A90E2;
               margin: 4px 0;
               color: $mt-azul;
               font-size: 14px;
-              font-weight: 500;
             }
           }
 
@@ -312,12 +286,8 @@ $mt-azul-claro: #4A90E2;
             button {
               flex: 1;
               padding: 10px;
-              border: none;
-              border-radius: 6px;
               font-size: 14px;
-              font-weight: 600;
-              cursor: pointer;
-              transition: all 0.3s ease;
+              @include btn;
 
               &:disabled {
                 opacity: 0.6;
@@ -328,22 +298,18 @@ $mt-azul-claro: #4A90E2;
             .btn-view-pet {
               background: $mt-verde;
               color: $mt-branco;
-              box-shadow: 0 2px 6px rgba(0, 155, 58, 0.3);
 
               &:hover:not(:disabled) {
                 background: darken($mt-verde, 10%);
-                transform: translateY(-2px);
               }
             }
 
             .btn-desvincular {
               background: $mt-amarelo;
               color: $mt-verde;
-              box-shadow: 0 2px 6px rgba(255, 209, 0, 0.3);
 
               &:hover:not(:disabled) {
                 background: darken($mt-amarelo, 10%);
-                transform: translateY(-2px);
               }
             }
           }
@@ -353,7 +319,7 @@ $mt-azul-claro: #4A90E2;
       .empty-pets {
         text-align: center;
         padding: 60px 20px;
-        background: linear-gradient(135deg, lighten($mt-verde, 60%) 0%, lighten($mt-verde, 65%) 100%);
+        background: linear-gradient(135deg, lighten($mt-verde, 60%), lighten($mt-verde, 65%));
         border-radius: 12px;
         border: 2px dashed $mt-verde;
 
@@ -367,45 +333,33 @@ $mt-azul-claro: #4A90E2;
         p {
           font-size: 18px;
           color: $mt-verde;
-          margin: 0 0 20px 0;
-          font-weight: 600;
+          margin: 0 0 20px;
         }
 
         .btn-vincular-empty {
           background: $mt-verde;
           color: $mt-branco;
-          border: none;
           padding: 14px 30px;
-          border-radius: 8px;
-          font-size: 16px;
-          font-weight: 600;
-          cursor: pointer;
-          transition: all 0.3s ease;
-          box-shadow: 0 2px 8px rgba(0, 155, 58, 0.3);
+          @include btn;
 
           &:hover {
             background: darken($mt-verde, 10%);
             transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(0, 155, 58, 0.5);
           }
         }
       }
     }
   }
 
-  // Modal
   .modal-overlay {
     position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
+    inset: 0;
     background: rgba(0, 0, 0, 0.6);
     display: flex;
     align-items: center;
     justify-content: center;
     z-index: 1000;
-    animation: fadeIn 0.3s ease;
+    animation: fadeIn 0.3s;
     padding: 20px;
 
     .modal-content {
@@ -413,8 +367,7 @@ $mt-azul-claro: #4A90E2;
       border-radius: 16px;
       width: 100%;
       max-width: 500px;
-      box-shadow: 0 8px 32px rgba(0, 155, 58, 0.3);
-      animation: slideUp 0.3s ease;
+      animation: slideUp 0.3s;
       border: 3px solid $mt-verde;
 
       .modal-header {
@@ -423,7 +376,7 @@ $mt-azul-claro: #4A90E2;
         display: flex;
         justify-content: space-between;
         align-items: center;
-        background: linear-gradient(135deg, lighten($mt-verde, 58%) 0%, lighten($mt-verde, 62%) 100%);
+        background: linear-gradient(135deg, lighten($mt-verde, 58%), lighten($mt-verde, 62%));
         border-radius: 13px 13px 0 0;
 
         h3 {
@@ -441,12 +394,11 @@ $mt-azul-claro: #4A90E2;
           height: 36px;
           border-radius: 50%;
           font-size: 20px;
-          font-weight: bold;
           cursor: pointer;
           display: flex;
           align-items: center;
           justify-content: center;
-          transition: all 0.3s ease;
+          transition: all 0.3s;
 
           &:hover {
             background: $mt-verde;
@@ -460,10 +412,9 @@ $mt-azul-claro: #4A90E2;
         padding: 30px;
 
         .modal-description {
-          margin: 0 0 20px 0;
+          margin: 0 0 20px;
           color: $mt-azul;
           font-size: 16px;
-          font-weight: 500;
         }
 
         .pet-select {
@@ -473,10 +424,9 @@ $mt-azul-claro: #4A90E2;
           border-radius: 8px;
           font-size: 16px;
           color: $mt-azul;
-          font-weight: 500;
           background: $mt-branco;
           cursor: pointer;
-          transition: all 0.3s ease;
+          transition: all 0.3s;
 
           &:focus {
             outline: none;
@@ -496,7 +446,6 @@ $mt-azul-claro: #4A90E2;
           border-left: 4px solid $mt-amarelo;
           border-radius: 8px;
           color: darken($mt-verde, 10%);
-          font-weight: 600;
           text-align: center;
         }
       }
@@ -512,12 +461,7 @@ $mt-azul-claro: #4A90E2;
 
         button {
           padding: 12px 30px;
-          border: none;
-          border-radius: 8px;
-          font-size: 16px;
-          font-weight: 600;
-          cursor: pointer;
-          transition: all 0.3s ease;
+          @include btn;
 
           &:disabled {
             opacity: 0.6;
@@ -538,159 +482,81 @@ $mt-azul-claro: #4A90E2;
         .btn-confirm-modal {
           background: $mt-verde;
           color: $mt-branco;
-          box-shadow: 0 2px 8px rgba(0, 155, 58, 0.3);
 
           &:hover:not(:disabled) {
             background: darken($mt-verde, 10%);
             transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(0, 155, 58, 0.5);
           }
         }
       }
     }
   }
 
-  // Animações
   @keyframes fadeIn {
-    from {
-      opacity: 0;
-    }
-    to {
-      opacity: 1;
-    }
+    from { opacity: 0; }
+    to { opacity: 1; }
   }
 
   @keyframes slideDown {
-    from {
-      opacity: 0;
-      transform: translateY(-10px);
-    }
-    to {
-      opacity: 1;
-      transform: translateY(0);
-    }
+    from { opacity: 0; transform: translateY(-10px); }
+    to { opacity: 1; transform: translateY(0); }
   }
 
   @keyframes slideUp {
-    from {
-      opacity: 0;
-      transform: translateY(20px);
-    }
-    to {
-      opacity: 1;
-      transform: translateY(0);
-    }
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
   }
 
   @keyframes pulse {
-    0%, 100% {
-      opacity: 1;
-    }
-    50% {
-      opacity: 0.7;
-    }
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.7; }
   }
 
-  // Responsividade
   @media (max-width: 768px) {
     padding: 15px;
 
-    .tutor-detail {
-      .detail-header {
-        flex-direction: column;
-        gap: 15px;
-        align-items: stretch;
+    .tutor-detail .detail-header {
+      flex-direction: column;
+      gap: 15px;
 
-        .btn-back {
-          width: 100%;
-        }
+      .btn-back, .header-actions { width: 100%; }
+      .header-actions button { flex: 1; }
+    }
 
-        .header-actions {
-          width: 100%;
-          
-          button {
-            flex: 1;
-          }
-        }
+    .tutor-info-card {
+      flex-direction: column !important;
+      align-items: center !important;
+      padding: 20px !important;
+
+      .tutor-photo img, .tutor-photo .photo-placeholder {
+        width: 150px !important;
+        height: 150px !important;
+        font-size: 60px;
       }
 
-      .tutor-info-card {
-        flex-direction: column;
-        align-items: center;
-        text-align: center;
-        padding: 20px;
-
-        .tutor-photo {
-          img, .photo-placeholder {
-            width: 150px;
-            height: 150px;
-          }
-
-          .photo-placeholder {
-            font-size: 60px;
-          }
-        }
-
-        .tutor-data {
-          width: 100%;
-
-          h1 {
-            font-size: 26px;
-          }
-
-          .info-grid {
-            grid-template-columns: 1fr;
-
-            .info-item {
-              text-align: left;
-            }
-          }
-        }
-      }
-
-      .pets-section {
-        padding: 20px;
-
-        .section-header {
-          flex-direction: column;
-          gap: 15px;
-          align-items: stretch;
-
-          .btn-vincular {
-            width: 100%;
-          }
-        }
-
-        .pets-grid {
-          grid-template-columns: 1fr;
-        }
+      .tutor-data {
+        width: 100%;
+        h1 { font-size: 26px; }
+        .info-grid { grid-template-columns: 1fr; }
       }
     }
 
-    .modal-overlay {
-      padding: 10px;
-
-      .modal-content {
-        .modal-header {
-          padding: 20px;
-
-          h3 {
-            font-size: 20px;
-          }
-        }
-
-        .modal-body {
-          padding: 20px;
-        }
-
-        .modal-actions {
-          flex-direction: column;
-
-          button {
-            width: 100%;
-          }
-        }
+    .pets-section {
+      padding: 20px !important;
+      
+      .section-header {
+        flex-direction: column;
+        gap: 15px;
+        .btn-vincular { width: 100%; }
       }
+      
+      .pets-grid { grid-template-columns: 1fr !important; }
+    }
+
+    .modal-content {
+      .modal-header { padding: 20px !important; h3 { font-size: 20px; } }
+      .modal-body { padding: 20px !important; }
+      .modal-actions { flex-direction: column; button { width: 100%; } }
     }
   }
 }
