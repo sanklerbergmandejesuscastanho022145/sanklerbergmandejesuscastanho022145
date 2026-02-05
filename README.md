@@ -86,23 +86,29 @@ npm install
 # Executar
 npm start
 
-# Acesse: http://localhost:4200
+## Acesse: http://localhost:4200
 
-### 🧪 Como Testar
-# Testes unitários
+# 🧪 Como Testar
+### Testes unitários
 npm test
 
-# Testes com coverage
+### Testes com coverage
 npm run test:coverage
 
 ## Scripts Disponíveis
-npm start              # Desenvolvimento
 
-npm run build:prod     # Build produção
+### Desenvolvimento
+npm start            
 
-npm test              # Testes
+### Build produção
+npm run build:prod    
 
-docker build -t pet-app .    # Build Docker
+### Testes
+npm test          
 
-docker run -d -p 4200:80 pet-app  # Executar Docker
+### Build Docker
+docker build -t pet-app .  
+
+### Executar Docker
+docker run -d -p 4200:80 pet-app  
 
