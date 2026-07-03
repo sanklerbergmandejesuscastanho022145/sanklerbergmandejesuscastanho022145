@@ -138,7 +138,6 @@ export class TutorFormComponent implements OnInit {
     
     operacao.subscribe({
       next: (tutorSalvo) => {
-        console.log('✅ Tutor salvo:', tutorSalvo);
         this.successMessage = this.isEditMode 
           ? 'Tutor atualizado com sucesso!' 
           : 'Tutor criado com sucesso!';
@@ -156,7 +155,7 @@ export class TutorFormComponent implements OnInit {
         this.cdr.detectChanges();
       },
       error: (error) => {
-        console.error('❌ Erro ao salvar:', error);
+        console.error('Erro ao salvar tutor:', error);
         this.errorMessage = 'Erro ao salvar tutor';
         this.loading = false;
         this.cdr.detectChanges();
@@ -178,7 +177,6 @@ export class TutorFormComponent implements OnInit {
             this.cdr.detectChanges();
           }
         } else if (event.type === HttpEventType.Response) {
-          console.log('✅ Upload concluído:', event.body);
           this.isUploading = false;
           this.loading = false;
           this.successMessage = 'Tutor e foto salvos com sucesso!';
@@ -191,7 +189,7 @@ export class TutorFormComponent implements OnInit {
         }
       },
       error: (error) => {
-        console.error('❌ Erro no upload:', error);
+        console.error('Erro no upload da foto:', error);
         this.errorMessage = 'Erro ao fazer upload da foto';
         this.isUploading = false;
         this.loading = false;

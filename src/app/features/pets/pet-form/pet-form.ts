@@ -57,12 +57,10 @@ export class PetFormComponent implements OnInit {
     this.isLoading = true;
     this.petsService.obterPetPorId(this.petId).subscribe({
       next: (pet) => {
-        console.log('Pet carregado para edição:', pet);
-        
         // Preenche o formulário com os dados do pet
         this.petForm.patchValue({
           nome: pet.nome,
-          especie: pet.raca,
+          especie: pet.especie || '',
           raca: pet.raca || '',
           idade: pet.idade,
         });

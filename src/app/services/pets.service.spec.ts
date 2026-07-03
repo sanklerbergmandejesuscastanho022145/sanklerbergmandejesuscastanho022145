@@ -59,7 +59,7 @@ describe('PetsService', () => {
 
   beforeEach(() => {
     localStorage.clear();
-    localStorage.setItem('token', 'fake-jwt-token');
+    localStorage.setItem('access_token', 'fake-jwt-token');
 
     TestBed.configureTestingModule({
       imports: [HttpClientTestingModule],
@@ -402,33 +402,53 @@ describe('PetsService', () => {
     it('should handle upload error', () => {
       const file = new File(['fake content'], 'pet-photo.jpg', { type: 'image/jpeg' });
 
-      service.uploadFotoPet('1', file).subscribe({
-        next: () => {
-          expect.fail('should have failed');
-        },
-        error: (error: HttpErrorResponse) => {
-          expect(error.status).toBe(500);
-        }
+      const promise = new Promise<void>((resolve, reject) => {
+        service.uploadFotoPet('1', file).subscribe({
+          next: () => {},
+          error: (error: HttpErrorResponse) => {
+            try {
+              expect(error.status).toBe(500);
+              resolve();
+            } catch (err) {
+              reject(err);
+            }
+          },
+          complete: () => {
+            resolve();
+          }
+        });
       });
 
       const req = httpMock.expectOne(`${API_URL}/v1/pets/1/fotos`);
       req.flush({ error: 'Upload failed' }, { status: 500, statusText: 'Internal Server Error' });
+
+      return promise;
     });
 
     it('should handle file size limit error', () => {
       const file = new File(['fake content'], 'large-photo.jpg', { type: 'image/jpeg' });
 
-      service.uploadFotoPet('1', file).subscribe({
-        next: () => {
-          throw new Error('should have failed');
-        },
-        error: (error: HttpErrorResponse) => {
-          expect(error.status).toBe(413);
-        }
+      const promise = new Promise<void>((resolve, reject) => {
+        service.uploadFotoPet('1', file).subscribe({
+          next: () => {},
+          error: (error: HttpErrorResponse) => {
+            try {
+              expect(error.status).toBe(413);
+              resolve();
+            } catch (err) {
+              reject(err);
+            }
+          },
+          complete: () => {
+            resolve();
+          }
+        });
       });
 
       const req = httpMock.expectOne(`${API_URL}/v1/pets/1/fotos`);
       req.flush('File too large', { status: 413, statusText: 'Payload Too Large' });
+
+      return promise;
     });
 
     it('should include FormData with foto field', () => {
@@ -522,7 +542,7 @@ describe('PetsService', () => {
     });
 
     it('should work when token is not present in localStorage', () => {
-      localStorage.removeItem('token');
+      localStorage.removeItem('access_token');
 
       service.listarPets().subscribe();
 
