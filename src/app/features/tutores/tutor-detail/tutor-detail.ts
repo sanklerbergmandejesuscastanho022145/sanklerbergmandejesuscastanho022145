@@ -48,24 +48,20 @@ export class TutorDetailComponent implements OnInit {
   carregarTutor(): void {
   if (!this.tutorId) return;
 
-  console.log('🔵 Iniciando carregamento do tutor:', this.tutorId);
   this.isloading = true;
   this.errorMessage = '';
   this.cdr.detectChanges();
 
   this.tutorService.obterTutorPorId(this.tutorId).subscribe({
     next: (tutor) => {
-      console.log('✅ Tutor carregado com sucesso:', tutor);
       this.tutor = tutor;
       this.isloading = false;
-      console.log('🔵 isloading agora é:', this.isloading);
       this.cdr.detectChanges();
     },
     error: (error) => {
-      console.error('❌ Erro ao carregar tutor:', error);
+      console.error('Erro ao carregar tutor:', error);
       this.errorMessage = 'Erro ao carregar dados do tutor. Tente novamente.';
       this.isloading = false;
-      console.log('🔵 isloading agora é:', this.isloading);
       this.cdr.detectChanges();
     }
   });

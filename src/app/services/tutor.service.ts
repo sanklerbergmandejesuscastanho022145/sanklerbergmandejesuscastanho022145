@@ -38,7 +38,7 @@ export class TutorService {
   constructor(private http: HttpClient) {}
 
   private getHeaders(): HttpHeaders {
-    const token = localStorage.getItem('token');
+    const token = localStorage.getItem('access_token');
     return new HttpHeaders({
       'Content-Type': 'application/json',
       'Authorization': `Bearer ${token}`
@@ -94,7 +94,7 @@ export class TutorService {
     const formData = new FormData();
     formData.append('foto', foto);
     
-    const token = localStorage.getItem('token');
+    const token = localStorage.getItem('access_token');
     const headers = new HttpHeaders({
       'Authorization': `Bearer ${token}`
     });
